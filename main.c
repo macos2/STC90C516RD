@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-char temp[16];
+char temp[8];
 unsigned char p;
 lm032l lcd;
 lm032l lcd2;
@@ -19,13 +19,20 @@ __interrupt 3 {
 void usart_interrupt()
 __interrupt 4 {
 	if (RI == 1) {
-		if (p < 255) {
-			temp[p] = SBUF;
-			temp[p + 1] = '\0';
-			SBUF = temp[p];
-			lm032l_write_data_direct(&lcd,temp[p]);
-			lm032l_write_data_direct(&lcd2,temp[p]);
-			p++;
+		temp[p] = SBUF;
+		if(temp[p]=='\r') {
+			temp[0]='\0';
+			p=0;
+			lm032l_write_string(&lcd,0x00,"          ",10);
+			lm032l_write_string(&lcd2,0x00,"          ",10);
+		} else {
+			if (p < 8) {
+				temp[p + 1] = '\0';
+				SBUF = temp[p];
+				lm032l_write_data_direct(&lcd,temp[p]);
+				lm032l_write_data_direct(&lcd2,temp[p]);
+				p++;
+			}
 		}
 		RI = 0;
 	} else {
@@ -48,20 +55,19 @@ void usart_init() { //115200@12M
 	EA = 1;
 }
 
-void lcd_init(){
-	lcd.DATA=gpio_format(1,GPIO_ALL_PIN);
-	lcd.E=gpio_format(2,0);
-	lcd.RS=gpio_format(2,1);
-	lcd.RW=gpio_format(2,2);
+void lcd_init() {
+	lcd.DATA = gpio_format(1, GPIO_ALL_PIN);
+	lcd.E = gpio_format(2, 0);
+	lcd.RS = gpio_format(2, 1);
+	lcd.RW = gpio_format(2, 2);
 	lm032l_init(&lcd);
 
-	lcd2.DATA=gpio_format(1,GPIO_ALL_PIN);
-	lcd2.E=gpio_format(2,3);
-	lcd2.RS=gpio_format(2,1);
-	lcd2.RW=gpio_format(2,2);
+	lcd2.DATA = gpio_format(1, GPIO_ALL_PIN);
+	lcd2.E = gpio_format(2, 3);
+	lcd2.RS = gpio_format(2, 1);
+	lcd2.RW = gpio_format(2, 2);
 	lm032l_init(&lcd2);
 }
-
 
 void main() {
 	timer1_init();

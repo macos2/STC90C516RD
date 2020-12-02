@@ -10,6 +10,7 @@
 #include "stc89xx_stc90xx.h"
 #include "gpio.h"
 #include "LM032L.h"
+#include "one_wire_bus.h"
 
 #define fosc 11059200
 #define baud 19200
