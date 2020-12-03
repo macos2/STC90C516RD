@@ -6,7 +6,7 @@
 //#define DATA P1 //code or data
 
 extern void lm032l_delay(){
-char i=0x4F;
+char i=0xFF;
 	while(i)i--;
 }
 

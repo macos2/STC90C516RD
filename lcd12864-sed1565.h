@@ -1,4 +1,3 @@
-#include "stc89xx_stc90xx.h"
 #include "gpio.h"
 
 #ifndef SED1565_H_

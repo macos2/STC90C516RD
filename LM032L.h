@@ -1,4 +1,3 @@
-#include "stc89xx_stc90xx.h"
 #include "gpio.h"
 
 #ifndef LM032L_H_

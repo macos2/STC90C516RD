@@ -1,5 +1,8 @@
 all:main.hex
 
+clean:
+	rm *.rel *.rst *.lst *.sym *.map *.mem *.ihx *.hex *.lk
+
 main.hex:main.c main.h gpio.rel LM032L.rel lcd12864-sed1565.rel
 	sdcc -mmcs51 $^ -o main.ihx
 	packihx main.ihx >$@
