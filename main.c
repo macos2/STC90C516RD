@@ -8,8 +8,8 @@
 #include "main.h"
 __xdata char temp[256];
 unsigned char p;
-lm032l lcd;
-lm032l lcd2;
+__xdata lm032l lcd;
+__xdata lm032l lcd2;
 
 void timer1_interrupt()
 __interrupt 3 {
@@ -32,6 +32,7 @@ __interrupt 4 {
 		case '\b':
 			p--;
 			temp[p] = '\0';
+			lm032l_write_string(&lcd, 0x00,"                ", 16);
 			break;
 		default:
 			if (p < 254) {
@@ -41,9 +42,9 @@ __interrupt 4 {
 			}
 			break;
 		}
-		if (p > 20) {
-			lm032l_write_string(&lcd, 0x00, temp + p - 20, 20);
-			lm032l_write_data(&lcd, 0x00, 0x19);
+		if (p > 16) {
+			lm032l_write_string(&lcd, 0x00, temp + p - 16, 16);
+			lm032l_write_data(&lcd, 0x00, 0b01111111);
 		} else {
 			lm032l_write_string(&lcd, 0x00, temp, p);
 		}
