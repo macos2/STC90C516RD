@@ -8,21 +8,32 @@
 
 #include "one_wire_bus.h"
 
-unsigned int __delay;
+unsigned char delay;
 //could not use the default gpio api function since the latch is so big
 #define one_wire_bus P37
 
 //ONE_WIRE_DELAY(1) =13.5us
-#define ONE_WIRE_DELAY(x) __delay=x;while(__delay--);
+//#define ONE_WIRE_DELAY(x) __delay=x;while(__delay--);
+
+//1 unit=2.2us
+void ONE_WIRE_DELAY(unsigned char x) __naked
+{
+	delay=x;
+	__asm
+	00001$:
+	DJNZ _delay , 00001$
+	RET
+	__endasm;
+}
 
 unsigned char one_wire_bus_present(){
 	unsigned char result=0x01;
 	one_wire_bus=0;
-	ONE_WIRE_DELAY(38);
+	ONE_WIRE_DELAY(225);
 	one_wire_bus=1;
 	ONE_WIRE_DELAY(1);
 	result=one_wire_bus;
-	while(!one_wire_bus);
+	ONE_WIRE_DELAY(50);
 	return result;
 }
 
@@ -32,12 +43,12 @@ void one_wire_bus_write(unsigned char value){
 	while(i>0){
 		if(value&0x01){//write 1
 			one_wire_bus=0;
-			ONE_WIRE_DELAY(0);
+			//ONE_WIRE_DELAY(1);
 			one_wire_bus=1;
-			ONE_WIRE_DELAY(1);
+			ONE_WIRE_DELAY(5);
 		}else{//write 0
 			one_wire_bus=0;
-			ONE_WIRE_DELAY(2);
+			ONE_WIRE_DELAY(10);
 		}
 		one_wire_bus=1;
 		value=value>>1;
@@ -52,7 +63,7 @@ unsigned char one_wire_bus_read(){
 		result=result>>1;
 		one_wire_bus=0;
 		one_wire_bus=1;
-		ONE_WIRE_DELAY(0);
+		ONE_WIRE_DELAY(18);
 		if(one_wire_bus)result|=0x80;
 		//one_wire_delay(45);
 		i--;
@@ -84,40 +95,39 @@ while(bit>=8){
 *d=*d&~(0x01<<bit);
 }
 
-void one_wire_bus_search_rom(gpio bus,unsigned char *result,unsigned char n_rom){
+
+
+void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
 	unsigned char bit,tmp,act=0;
-	unsigned char fork[8],*f;
+	unsigned char i=0,*p=result;//record the position of the result
+	unsigned char map=0x00,log_map=0x00,mix=0;//record the decision of re-act in the rom mix position
 	while(n_rom){
 		one_wire_bus_present();
 		one_wire_bus_write(ONE_WIRE_SEARCH_ROM);
+		map=log_map<<(8-mix);
+		log_map=0xff;
 		for(bit=0;bit<64;bit++){
 			//get first bit
-			gpio_set(bus,0);
-			ONE_WIRE_DELAY(0);
-			gpio_set(bus,1);
-			ONE_WIRE_DELAY(0);
-			tmp=gpio_get(bus);
+			one_wire_bus=0;
+			one_wire_bus=1;
+			ONE_WIRE_DELAY(18);
+			tmp=one_wire_bus;
 			tmp=tmp<<1;
 
 			//get secone bit
-			gpio_set(bus,0);
-			ONE_WIRE_DELAY(0);
-			gpio_set(bus,1);
-			ONE_WIRE_DELAY(0);
-			tmp+=gpio_get(bus);
+			one_wire_bus=0;
+			one_wire_bus=1;
+			ONE_WIRE_DELAY(18);
+			tmp+=one_wire_bus;
 
 			//decide
 			switch(tmp)
 			{
 			case 0b00:
-				if(fork[0]>bit){
-					//this fork have been detected before
-					act=1;
-				}else{
-					//this fork have never been detected before
-					act=0;
-					fork[0]=bit;
-				}
+				act=map&0x80?0x01:0x00;
+				map=map<<1;
+				mix++;
+				log_map=(log_map<<1)+act;
 				//there is a fork of this bit.
 				break;
 			case 0b01:
@@ -131,15 +141,29 @@ void one_wire_bus_search_rom(gpio bus,unsigned char *result,unsigned char n_rom)
 			default:
 				//0b11
 				//there is no device on the bus
+				return;
 				break;
 			}
-			gpio_set(bus,0);
-			ONE_WIRE_DELAY(15);
-			gpio_set(bus,act);
-			ONE_WIRE_DELAY(45);
-			gpio_set(bus,1);
-			//result
-		}
 
+			//save the bit of the rom
+			*p=*p|(act<<i);
+			i++;
+			if(i>8){p++;i=0;}
+
+			//reaction to the bus
+			if(act){//write 1
+				one_wire_bus=0;
+				//ONE_WIRE_DELAY(1);
+				one_wire_bus=1;
+				ONE_WIRE_DELAY(5);
+			}else{//write 0
+				one_wire_bus=0;
+				ONE_WIRE_DELAY(10);
+			}
+
+
+		}
+		log_map++;//new map for next search rom
+		n_rom--;
 	}
 }

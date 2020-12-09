@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-__xdata char temp[256],temp2[256];
+__xdata char temp[256],temp2[256],ds18b20[256];
 __xdata lm032l lcd;
 __xdata lm032l lcd2;
 __xdata unsigned char p;
@@ -91,21 +91,21 @@ void lcd_init() {
 	lcd.RW = gpio_format(2, 5);
 	lm032l_init(&lcd);
 
-	lcd2.DATA = gpio_format(0, GPIO_ALL_PIN);
-	lcd2.E = gpio_format(2, 7);
+	lcd2.DATA = gpio_format(1, GPIO_ALL_PIN);
+	lcd2.E = gpio_format(3, 2);
 	lcd2.RS = gpio_format(2, 6);
 	lcd2.RW = gpio_format(2, 5);
 	lm032l_init(&lcd2);
 }
 
 void one_wire_read_rom(){
-	unsigned char i;
-	one_wire_result=one_wire_bus_present();
-	one_wire_bus_write(ONE_WIRE_READ_ROM);
-	for(i=0;i<8;i++){
-	ds18b20_rom[i]=one_wire_bus_read();
-}
-
+//	unsigned char i;
+//	one_wire_result=one_wire_bus_present();
+//	one_wire_bus_write(ONE_WIRE_READ_ROM);
+//	for(i=0;i<8;i++){
+//	ds18b20_rom[i]=one_wire_bus_read();
+//}
+	one_wire_bus_search_rom(ds18b20,4);
 }
 
 void main() {

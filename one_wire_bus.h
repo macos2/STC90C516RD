@@ -26,6 +26,6 @@ void reset_bit(unsigned bit,unsigned char *d);
  * the result will save in the *result which has alloced more than n_rom x 8byte memory.
  * n_rom limit the number of device of searching.
  */
-void one_wire_bus_search_rom(gpio bus,unsigned char *result,unsigned char n_rom);
+void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom);
 
 #endif /* 1WIRE_BUS_H_ */
