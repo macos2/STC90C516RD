@@ -29,9 +29,9 @@ void ONE_WIRE_DELAY(unsigned char x) __naked
 unsigned char one_wire_bus_present(){
 	unsigned char result=0x01;
 	one_wire_bus=0;
-	ONE_WIRE_DELAY(225);
+	ONE_WIRE_DELAY(218);
 	one_wire_bus=1;
-	ONE_WIRE_DELAY(1);
+	ONE_WIRE_DELAY(19);
 	result=one_wire_bus;
 	ONE_WIRE_DELAY(50);
 	return result;
@@ -63,7 +63,7 @@ unsigned char one_wire_bus_read(){
 		result=result>>1;
 		one_wire_bus=0;
 		one_wire_bus=1;
-		ONE_WIRE_DELAY(18);
+		ONE_WIRE_DELAY(5);
 		if(one_wire_bus)result|=0x80;
 		//one_wire_delay(45);
 		i--;
@@ -107,17 +107,19 @@ void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
 		map=log_map<<(8-mix);
 		log_map=0xff;
 		for(bit=0;bit<64;bit++){
+			tmp=0x00;
 			//get first bit
 			one_wire_bus=0;
 			one_wire_bus=1;
-			ONE_WIRE_DELAY(18);
+			ONE_WIRE_DELAY(5);
 			tmp=one_wire_bus;
 			tmp=tmp<<1;
 
+			ONE_WIRE_DELAY(1);
 			//get secone bit
 			one_wire_bus=0;
 			one_wire_bus=1;
-			ONE_WIRE_DELAY(18);
+			ONE_WIRE_DELAY(5);
 			tmp+=one_wire_bus;
 
 			//decide
