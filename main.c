@@ -10,8 +10,7 @@ __xdata char temp[256],temp2[256],ds18b20[256];
 __xdata lm032l lcd;
 __xdata lm032l lcd2;
 __xdata unsigned char p;
-__xdata unsigned char one_wire_result;
-__xdata unsigned char ds18b20_rom[8];
+__xdata unsigned char one_wire_result,scratchpad[9];
 
 void one_wire_read_rom();
 void one_wire_show_search_result();
@@ -95,21 +94,30 @@ void lcd_init() {
 }
 
 void one_wire_read_rom(){
-//	unsigned char i;
-//	one_wire_result=one_wire_bus_present();
-//	one_wire_bus_write(ONE_WIRE_READ_ROM);
-//	for(i=0;i<8;i++){
-//		ds18b20[i+8]=one_wire_bus_read();
-//}
-	one_wire_bus_search_rom(ds18b20,6);
+	one_wire_result=one_wire_bus_search_rom(0,ds18b20,6);
 	one_wire_show_search_result();
 }
 
 void one_wire_show_search_result(){
-	temp2[255]=sprintf(temp2,"%02x%02x%02x%02x%02x%02x%02x%02x",ds18b20[0],ds18b20[1],ds18b20[2],ds18b20[3],ds18b20[4],ds18b20[5],ds18b20[6],ds18b20[7]);
-	lm032l_write_string(&lcd2, 0x00, temp2, temp2[255]);
-	temp2[255]=sprintf(temp2,"%02x%02x%02x%02x%02x%02x%02x%02x",ds18b20[8],ds18b20[9],ds18b20[10],ds18b20[11],ds18b20[12],ds18b20[13],ds18b20[14],ds18b20[15]);
-	lm032l_write_string(&lcd2, 0x40, temp2, temp2[255]);
+	unsigned char i;
+	temp2[255]=sprintf(temp2,"found %02d",one_wire_result);
+	lm032l_write_string(&lcd2,0x00,temp2,temp2[255]);
+
+	one_wire_bus_present();
+	one_wire_bus_write(ONE_WIRE_SKIP_ROM);
+	ds18b20_write_scratchpad(0x10,0x20,0x7f);
+
+	one_wire_bus_present();
+	one_wire_bus_write(ONE_WIRE_SKIP_ROM);
+	ds18b20_convert_t();
+
+	one_wire_bus_match_rom(ds18b20);
+	ds18b20_read_scratchpad(scratchpad,9);
+
+	for(i=0;i<9;i++){
+	temp2[255]=sprintf(temp2,"%02x",scratchpad[i]);
+	lm032l_write_string(&lcd2,0x40+i*2,temp2,temp2[255]);
+	}
 }
 
 void main() {

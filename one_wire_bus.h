@@ -17,15 +17,18 @@
 unsigned char one_wire_bus_present();
 void one_wire_bus_write(unsigned char value);
 unsigned char one_wire_bus_read();
-unsigned char get_bit(unsigned bit,unsigned char *d);
-void set_bit(unsigned bit,unsigned char *d);
-void reset_bit(unsigned bit,unsigned char *d);
 
 /*
  * search the device rom on the bus
- * the result will save in the *result which has alloced more than n_rom x 8byte memory.
+ *
+ * alarm_search !=0 perform alarm searching.
+ * *result will save in the search result , which point to the memory has alloced more than n_rom x 8 byte .
  * n_rom limit the number of device of searching.
+ *
+ * return the number of devices which has been found.
  */
-void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom);
+unsigned char one_wire_bus_search_rom(unsigned char alarm_search ,unsigned char *result,unsigned char n_rom);
+void one_wire_bus_read_rom(unsigned char *result);
+void one_wire_bus_match_rom(unsigned char *rom);
 
 #endif /* 1WIRE_BUS_H_ */

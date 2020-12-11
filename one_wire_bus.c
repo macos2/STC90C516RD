@@ -71,39 +71,17 @@ unsigned char one_wire_bus_read(){
 	return result;
 }
 
-unsigned char get_bit(unsigned bit,unsigned char *d){
-while(bit>=8){
-	bit=bit-8;
-	d=d+1;
-}
-return *d&(0x01<<bit);
-}
-
-void set_bit(unsigned bit,unsigned char *d){
-while(bit>=8){
-	bit=bit-8;
-	d=d+1;
-}
-*d=*d|(0x01<<bit);
-}
-
-void reset_bit(unsigned bit,unsigned char *d){
-while(bit>=8){
-	bit=bit-8;
-	d=d+1;
-}
-*d=*d&~(0x01<<bit);
-}
-
-
-
-void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
-	unsigned char bit,tmp,act=0;
+unsigned char one_wire_bus_search_rom(unsigned char alarm_search ,unsigned char *result,unsigned char n_rom){
+	unsigned char bit,tmp,act=0,n=n_rom;
 	unsigned char i=0,*p=result;//record the position of the result
 	unsigned char map=0x00,log_map=0x00,mix=0;//record the decision of re-act in the rom mix position
 	while(n_rom){
 		one_wire_bus_present();
-		one_wire_bus_write(ONE_WIRE_SEARCH_ROM);
+
+		if(alarm_search)
+			one_wire_bus_write(ONE_WIRE_ALARM_SEARCH);
+		else
+			one_wire_bus_write(ONE_WIRE_SEARCH_ROM);
 		map=log_map<<(8-mix);
 		log_map=0xff;
 		mix=0;
@@ -144,7 +122,7 @@ void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
 			default:
 				//0b11
 				//there is no device on the bus
-				return;
+				return n-n_rom;
 				break;
 			}
 
@@ -165,8 +143,29 @@ void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
 			}
 			one_wire_bus=1;
 		}
-		if(log_map==0xff)return;//there is no other device for search
+		if(log_map==0xff)return n-n_rom+1;//there is no other device for search
 		log_map++;//new map for next search rom
 		n_rom--;
 	}
+	return n-n_rom;
 }
+
+void one_wire_bus_read_rom(unsigned char *result){
+	unsigned char i;
+	one_wire_bus_present();
+	one_wire_bus_write(ONE_WIRE_READ_ROM);
+	for(i=0;i<8;i++){
+		result[i]=one_wire_bus_read();
+}
+}
+
+void one_wire_bus_match_rom(unsigned char *rom){
+	unsigned char i;
+	one_wire_bus_present();
+	one_wire_bus_write(ONE_WIRE_MATCH_ROM);
+	for(i=0;i<8;i++){
+		one_wire_bus_write(rom[i]);
+	}
+}
+
+

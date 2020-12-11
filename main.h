@@ -11,6 +11,7 @@
 #include "gpio.h"
 #include "LM032L.h"
 #include "one_wire_bus.h"
+#include "ds18b20.h"
 
 #define fosc 11059200
 #define baud 19200
