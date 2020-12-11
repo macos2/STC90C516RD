@@ -14,6 +14,7 @@ __xdata unsigned char one_wire_result;
 __xdata unsigned char ds18b20_rom[8];
 
 void one_wire_read_rom();
+void one_wire_show_search_result();
 
 void timer1_interrupt()
 __interrupt 3 {
@@ -56,11 +57,6 @@ __interrupt 4 {
 		}
 		SBUF = tmp;
 		one_wire_read_rom();
-		temp2[255]=sprintf(temp2,"1wire present:%d",one_wire_result);
-		lm032l_write_string(&lcd2, 0x00, temp2, temp2[255]);
-		temp2[255]=sprintf(temp2,"%02x%02x%02x%02x%02x%02x%02x%02x",ds18b20_rom[0],ds18b20_rom[1],ds18b20_rom[2],ds18b20_rom[3],ds18b20_rom[4],ds18b20_rom[5],ds18b20_rom[6],ds18b20_rom[7]);
-		lm032l_write_string(&lcd2, 0x40, temp2, temp2[255]);
-
 	} else {
 		TI = 0;
 	}
@@ -91,8 +87,8 @@ void lcd_init() {
 	lcd.RW = gpio_format(2, 5);
 	lm032l_init(&lcd);
 
-	lcd2.DATA = gpio_format(0, GPIO_ALL_PIN);
-	lcd2.E = gpio_format(2, 7);
+	lcd2.DATA = gpio_format(1, GPIO_ALL_PIN);
+	lcd2.E = gpio_format(3, 2);
 	lcd2.RS = gpio_format(2, 6);
 	lcd2.RW = gpio_format(2, 5);
 	lm032l_init(&lcd2);
@@ -106,6 +102,14 @@ void one_wire_read_rom(){
 //	ds18b20_rom[i]=one_wire_bus_read();
 //}
 	one_wire_bus_search_rom(ds18b20,4);
+	one_wire_show_search_result();
+}
+
+void one_wire_show_search_result(){
+	temp2[255]=sprintf(temp2,"%02x%02x%02x%02x%02x%02x%02x%02x",ds18b20[0],ds18b20[1],ds18b20[2],ds18b20[3],ds18b20[4],ds18b20[5],ds18b20[6],ds18b20[7]);
+	lm032l_write_string(&lcd2, 0x00, temp2, temp2[255]);
+	temp2[255]=sprintf(temp2,"%02x%02x%02x%02x%02x%02x%02x%02x",ds18b20[8],ds18b20[9],ds18b20[10],ds18b20[11],ds18b20[12],ds18b20[13],ds18b20[14],ds18b20[15]);
+	lm032l_write_string(&lcd2, 0x40, temp2, temp2[255]);
 }
 
 void main() {
