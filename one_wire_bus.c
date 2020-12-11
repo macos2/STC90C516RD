@@ -10,7 +10,7 @@
 
 unsigned char delay;
 //could not use the default gpio api function since the latch is so big
-#define one_wire_bus P37
+#define one_wire_bus P34
 
 //ONE_WIRE_DELAY(1) =13.5us
 //#define ONE_WIRE_DELAY(x) __delay=x;while(__delay--);
@@ -106,6 +106,7 @@ void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
 		one_wire_bus_write(ONE_WIRE_SEARCH_ROM);
 		map=log_map<<(8-mix);
 		log_map=0xff;
+		mix=0;
 		for(bit=0;bit<64;bit++){
 			tmp=0x00;
 			//get first bit
@@ -165,7 +166,6 @@ void one_wire_bus_search_rom(unsigned char *result,unsigned char n_rom){
 			one_wire_bus=1;
 		}
 		if(log_map==0xff)return;//there is no other device for search
-
 		log_map++;//new map for next search rom
 		n_rom--;
 	}
