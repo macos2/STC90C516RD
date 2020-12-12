@@ -104,11 +104,11 @@ void one_wire_show_search_result(){
 	lm032l_write_string(&lcd2,0x00,temp2,temp2[255]);
 
 	one_wire_bus_present();
-	one_wire_bus_write(ONE_WIRE_SKIP_ROM);
-	ds18b20_write_scratchpad(0x10,0x20,0x7f);
+	one_wire_bus_match_rom(ds18b20);
+	ds18b20_write_scratchpad(0x10,0x20,0x3f);
 
 	one_wire_bus_present();
-	one_wire_bus_write(ONE_WIRE_SKIP_ROM);
+	one_wire_bus_match_rom(ds18b20);
 	ds18b20_convert_t();
 
 	one_wire_bus_match_rom(ds18b20);
