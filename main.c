@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-__xdata char temp[256],temp2[256],ds18b20[256];
+__xdata char temp[256],temp2[256],ds18b20[256],usart_buf[256];
 __xdata lm032l lcd;
 __xdata lm032l lcd2;
 __xdata unsigned char p;
@@ -58,6 +58,14 @@ __interrupt 4 {
 		one_wire_read_rom();
 	} else {
 		TI = 0;
+		if(usart_buf[255]){
+			SBUF=usart_buf[usart_buf[254]];
+			usart_buf[255]--;
+			usart_buf[254]++;
+		}
+		else{
+			usart_buf[254]=0;
+		}
 	}
 
 }
@@ -94,6 +102,13 @@ void lcd_init() {
 }
 
 void one_wire_read_rom(){
+	gpio io=gpio_format(1,1);
+	gpio_set(io,0);
+	gpio_set(io,1);
+	gpio_set(io,0);
+	gpio_set(io,1);
+	gpio_set(io,0);
+	gpio_set(io,1);
 	one_wire_result=one_wire_bus_search_rom(0,ds18b20,6);
 	one_wire_show_search_result();
 }
@@ -120,6 +135,9 @@ void one_wire_show_search_result(){
 	for(i=0;i<9;i++){
 	temp2[255]=sprintf(temp2,"%02x",scratchpad[i]);
 	lm032l_write_string(&lcd2,0x40+i*2,temp2,temp2[255]);
+	}
+	for(i=0;i<one_wire_result*8;i++){
+	usart_buf[255]+=sprintf(usart_buf,"%02x",ds18b20[i]);
 	}
 }
 
