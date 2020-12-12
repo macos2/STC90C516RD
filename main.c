@@ -86,8 +86,8 @@ void lcd_init() {
 	lcd.RW = gpio_format(2, 5);
 	lm032l_init(&lcd);
 
-	lcd2.DATA = gpio_format(1, GPIO_ALL_PIN);
-	lcd2.E = gpio_format(3, 2);
+	lcd2.DATA = gpio_format(0, GPIO_ALL_PIN);
+	lcd2.E = gpio_format(2, 7);
 	lcd2.RS = gpio_format(2, 6);
 	lcd2.RW = gpio_format(2, 5);
 	lm032l_init(&lcd2);
@@ -105,7 +105,7 @@ void one_wire_show_search_result(){
 
 	one_wire_bus_present();
 	one_wire_bus_match_rom(ds18b20);
-	ds18b20_write_scratchpad(0x10,0x20,0x3f);
+	ds18b20_write_scratchpad(0x10,0x20,0x7f);
 
 	one_wire_bus_present();
 	one_wire_bus_match_rom(ds18b20);
@@ -113,6 +113,9 @@ void one_wire_show_search_result(){
 
 	one_wire_bus_match_rom(ds18b20);
 	ds18b20_read_scratchpad(scratchpad,9);
+
+	temp2[255]=ds18b20_temperature_to_string(scratchpad,temp2);
+	lm032l_write_string(&lcd2,0x09,temp2,temp2[255]);
 
 	for(i=0;i<9;i++){
 	temp2[255]=sprintf(temp2,"%02x",scratchpad[i]);

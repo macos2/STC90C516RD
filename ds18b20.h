@@ -9,6 +9,7 @@
 #define DS18B20_H_
 
 #include "one_wire_bus.h"
+#include <stdio.h>
 
 #define DS18B20_CONVERT_T 0x44
 #define DS18B20_WRITE_SCRATCHPAD 0x4E
@@ -23,5 +24,6 @@ void ds18b20_read_scratchpad(unsigned char *result,unsigned char len);
 void ds18b20_copy_scratchpad();
 void ds18b20_recall_e2();
 unsigned char ds18b20_read_power_supply();
+unsigned char ds18b20_temperature_to_string(unsigned char *value,char *string);
 
 #endif /* DS18B20_H_ */
