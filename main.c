@@ -94,27 +94,20 @@ void lcd_init() {
 	lcd.RW = gpio_format(2, 5);
 	lm032l_init(&lcd);
 
-	lcd2.DATA = gpio_format(0, GPIO_ALL_PIN);
-	lcd2.E = gpio_format(2, 7);
+	lcd2.DATA = gpio_format(1, GPIO_ALL_PIN);
+	lcd2.E = gpio_format(3, 2);
 	lcd2.RS = gpio_format(2, 6);
 	lcd2.RW = gpio_format(2, 5);
 	lm032l_init(&lcd2);
 }
 
 void one_wire_read_rom(){
-	gpio io=gpio_format(1,1);
-	gpio_set(io,0);
-	gpio_set(io,1);
-	gpio_set(io,0);
-	gpio_set(io,1);
-	gpio_set(io,0);
-	gpio_set(io,1);
 	one_wire_result=one_wire_bus_search_rom(0,ds18b20,6);
 	one_wire_show_search_result();
 }
 
 void one_wire_show_search_result(){
-	unsigned char i;
+	unsigned char i,j,*d;
 	temp2[255]=sprintf(temp2,"found %02d",one_wire_result);
 	lm032l_write_string(&lcd2,0x00,temp2,temp2[255]);
 
@@ -136,8 +129,20 @@ void one_wire_show_search_result(){
 	temp2[255]=sprintf(temp2,"%02x",scratchpad[i]);
 	lm032l_write_string(&lcd2,0x40+i*2,temp2,temp2[255]);
 	}
-	for(i=0;i<one_wire_result*8;i++){
-	usart_buf[255]+=sprintf(usart_buf,"%02x",ds18b20[i]);
+	d=ds18b20;
+
+	for(j=0;j<one_wire_result;j++){
+	for(i=0;i<8;i++){
+	usart_buf[255]+=sprintf(usart_buf+usart_buf[255],"%02x",d[i]);
+	}
+
+	one_wire_bus_match_rom(ds18b20);
+	ds18b20_read_scratchpad(scratchpad,9);
+	usart_buf[255]+=sprintf(usart_buf+usart_buf[255]," : ");
+	usart_buf[255]+=ds18b20_temperature_to_string(scratchpad,usart_buf+usart_buf[255]);
+
+	d+=8;
+	usart_buf[255]+=sprintf(usart_buf+usart_buf[255],"\r\n");
 	}
 }
 

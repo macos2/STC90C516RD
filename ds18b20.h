@@ -19,11 +19,11 @@
 #define DS18B20_READ_POWER_SUPPLY 0xb4
 
 void ds18b20_convert_t();
-void ds18b20_write_scratchpad(unsigned char TL,unsigned char TH,unsigned CFG);
-void ds18b20_read_scratchpad(unsigned char *result,unsigned char len);
+void ds18b20_write_scratchpad( unsigned char TL, unsigned char TH, unsigned CFG);
+void ds18b20_read_scratchpad( unsigned char *result, unsigned char len);
 void ds18b20_copy_scratchpad();
 void ds18b20_recall_e2();
 unsigned char ds18b20_read_power_supply();
-unsigned char ds18b20_temperature_to_string(unsigned char *value,char *string);
+unsigned char ds18b20_temperature_to_string( unsigned char *value, char *string);
 
 #endif /* DS18B20_H_ */

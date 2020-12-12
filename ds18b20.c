@@ -11,7 +11,7 @@ void ds18b20_convert_t() {
 	one_wire_bus_write(DS18B20_CONVERT_T);
 }
 
-void ds18b20_write_scratchpad(unsigned char TL, unsigned char TH, unsigned CFG) {
+void ds18b20_write_scratchpad( unsigned char TL, unsigned char TH, unsigned CFG) {
 	one_wire_bus_write(DS18B20_WRITE_SCRATCHPAD);
 	one_wire_bus_write(TH);
 	one_wire_bus_write(TL);
@@ -19,7 +19,7 @@ void ds18b20_write_scratchpad(unsigned char TL, unsigned char TH, unsigned CFG) 
 	one_wire_bus_present();
 }
 
-void ds18b20_read_scratchpad(unsigned char *result, unsigned char len) {
+void ds18b20_read_scratchpad( unsigned char *result, unsigned char len) {
 	one_wire_bus_write(DS18B20_READ_SCRATCHPAD);
 	if (len > 9)
 		len = 9;
@@ -45,7 +45,7 @@ unsigned char ds18b20_read_power_supply() {
 	return one_wire_bus_read();
 }
 
-unsigned char ds18b20_temperature_to_string(unsigned char *value, char *string) {
+unsigned char ds18b20_temperature_to_string( unsigned char *value, char *string) {
 	unsigned char i = 0;
 	unsigned int *temp = value, t = 0;
 	if (*temp & 0x8000) {
