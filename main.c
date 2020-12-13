@@ -9,11 +9,12 @@
 __xdata char temp[256],temp2[256],ds18b20[256],usart_buf[256];
 __xdata lm032l lcd;
 __xdata lm032l lcd2;
-__xdata unsigned char p;
+__xdata Ds1302 timer;
 __xdata unsigned char one_wire_result,scratchpad[9];
 
 void one_wire_read_rom();
 void one_wire_show_search_result();
+void timer_get_time();
 
 void timer1_interrupt()
 __interrupt 3 {
@@ -30,32 +31,34 @@ __interrupt 4 {
 		lm032l_write_code(&lcd2, LM032L_CLEAR);
 		switch (tmp) {
 			case '\r':
+			if(strstr(temp,"time")==0)timer_get_time();
+			if(strstr(temp,"temp")==0)one_wire_read_rom();
 			temp[0] = '\0';
-			p = 0;
+			temp[1] = '\0';
+			temp[255]=0;
 			break;
 			case '\b':
-			if(p>0) {
-				p--;
-				temp[p] = '\0';
-				lm032l_write_string(&lcd, 0x00,"                ", 16);
+			if(temp[255]>0) {
+				temp[255]--;
+				temp[temp[255]] = '\0';
 			}
 			break;
 			default:
-			if (p < 254) {
-				temp[p] = tmp;
-				p++;
-				temp[p] = '\0';
+			if (temp[255] < 254) {
+				temp[temp[255]] = tmp;
+				temp[255]++;
+				temp[temp[255]] = '\0';
 			}
 			break;
 		}
-		if (p > 16) {
-			lm032l_write_string(&lcd, 0x00, temp + p - 16, 16);
+		if (temp[255] > 16) {
+			lm032l_write_string(&lcd, 0x00, temp + temp[255] - 16, 16);
 			lm032l_write_data(&lcd, 0x00, 0b01111111);
 		} else {
-			lm032l_write_string(&lcd, 0x00, temp, p);
+			lm032l_write_string(&lcd, 0x00, temp, temp[255]);
 		}
 		SBUF = tmp;
-		one_wire_read_rom();
+
 	} else {
 		TI = 0;
 		if(usart_buf[255]){
@@ -83,8 +86,7 @@ void usart_init() {
 	PCON = 0x80; //T1 foscx2
 	ES = 1;
 	EA = 1;
-	p = 0;
-	temp[p] = '\0';
+	temp[0] = '\0';
 }
 
 void lcd_init() {
@@ -146,10 +148,27 @@ void one_wire_show_search_result(){
 	}
 }
 
+void timer_init(){
+	timer.io=gpio_format(1,1);
+	timer.rst=gpio_format(3,4);
+	timer.sclk=gpio_format(1,0);
+}
+
+void timer_get_time(){
+unsigned char tmp[9],i;
+ds1302_read(&timer,0,tmp,0x00,9);
+usart_buf[255]+=sprintf(usart_buf+usart_buf[255],"timer:\r\n");
+for(i=0;i<9;i++){
+	usart_buf[255]+=sprintf(usart_buf+usart_buf[255],"%02x ",tmp[i]);
+}
+}
+
+
 void main() {
 	timer1_init();
 	usart_init();
 	lcd_init();
+	timer_init();
 	one_wire_read_rom();
 	while (1) {
 	};
