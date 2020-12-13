@@ -7,19 +7,19 @@
 
 #include "gpio.h"
 #define SET_PORT(x) case x: P##x=value;return;break;
-#define SET_PIN(x) 	case x:	switch (__port){ 	case 0:P0##x=value;return;break; case 1:P1##x=value;return;break; case 2:P2##x=value;return;break;	case 3:P3##x=value;return;break;}break;
+#define SET_PIN(x) 	case x:	switch (port){ case 0:P0##x=value;return;break; case 1:P1##x=value;return;break; case 2:P2##x=value;return;break;	case 3:P3##x=value;return;break;}break;
 
 #define GET_PORT(x) case x: return P##x;break;
-#define GET_PIN(x)  case x: switch (__port){ case 0:return P0##x;break; case 1:return P1##x;break; case 2:return P2##x;break; case 3:return P3##x;break; case 4:return P4##x;break;}break;
+#define GET_PIN(x)  case x: switch (port){ case 0:return P0##x;break; case 1:return P1##x;break; case 2:return P2##x;break; case 3:return P3##x;break; case 4:return P4##x;break;}break;
 
-__idata unsigned char __port,__pin;
+
 
 void gpio_set(gpio io,unsigned char value) {
-	__port=io>>4;
-	__pin=io&0x0f;
-	switch(__pin){
+	unsigned char port=io>>4;
+	unsigned char pin=io&0x0f;
+	switch(pin){
 		case GPIO_ALL_PIN:
-			switch(__port){
+			switch(port){
 				SET_PORT(0);
 				SET_PORT(1);
 				SET_PORT(2);
@@ -38,12 +38,12 @@ void gpio_set(gpio io,unsigned char value) {
 	};
 }
 
-unsigned char gpio_get(gpio io) __naked {
-	__port=io>>4;
-	__pin=io&0x0f;
-	switch (__pin){
+unsigned char gpio_get(gpio io) {
+	unsigned char port=io>>4;
+	unsigned char pin=io&0x0f;
+	switch (pin){
 		case  GPIO_ALL_PIN:
-			switch(__port){
+			switch(port){
 				GET_PORT(0)
 				GET_PORT(1)
 				GET_PORT(2)

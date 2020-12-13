@@ -10,7 +10,7 @@
 
 unsigned char delay;
 //could not use the default gpio api function since the latch is so big
-#define one_wire_bus P35
+
 
 //ONE_WIRE_DELAY(1) =13.5us
 //#define ONE_WIRE_DELAY(x) __delay=x;while(__delay--);

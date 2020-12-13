@@ -13,6 +13,8 @@
 #define ONE_WIRE_MATCH_ROM 0x55
 #define ONE_WIRE_SKIP_ROM 0xCC
 #define ONE_WIRE_ALARM_SEARCH 0xEC
+#define one_wire_bus P37
+
 
 unsigned char one_wire_bus_present();
 void one_wire_bus_write(unsigned char value);
