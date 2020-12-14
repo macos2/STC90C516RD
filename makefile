@@ -1,4 +1,4 @@
-opt= -mmcs51 --model-medium 
+opt= -mmcs51  --model-medium 
 all:main.hex
 
 clean:
