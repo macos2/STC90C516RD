@@ -31,19 +31,17 @@ void ds1302_write(Ds1302 *dev, unsigned is_ram_data, unsigned char addr,
 	gpio_set(dev->rst, 0);
 }
 
-void ds1302_read(Ds1302 *dev, unsigned is_ram_data, unsigned char *buf,
-		unsigned char addr, unsigned char len) {
-	unsigned char command = 0x81, i, j;
+void ds1302_read(Ds1302 *dev, unsigned is_ram_data,	unsigned char addr, unsigned char *result) {
+	unsigned char command = 0x81, i;
 	if (is_ram_data)
 		command += 0x40;
 	command |= (addr & 0x1F) << 1;
 
-	for (j = 0; j < len; j++) {
 		gpio_set(dev->rst, 0);
 		gpio_set(dev->io, 0);
 		gpio_set(dev->sclk, 0);
 		gpio_set(dev->rst, 1);
-		command |= ((addr + j) & 0x1F) << 1;
+		command |= (addr & 0x1F) << 1;
 		for (i = 0; i < 8; i++) {
 			gpio_set(dev->sclk, 0);
 			gpio_set(dev->io, 0x01 & (command >> i));
@@ -52,14 +50,12 @@ void ds1302_read(Ds1302 *dev, unsigned is_ram_data, unsigned char *buf,
 		}
 		for (i = 0; i < 8; i++) {
 			gpio_set(dev->sclk, 0);
-			*buf |= (gpio_get(dev->io) << i);
+			*result |= (gpio_get(dev->io) << i);
 			gpio_set(dev->sclk, 1);
 		}
-		buf++;
 		gpio_set(dev->rst, 0);
 	}
 
-}
 
 unsigned char __tmp;
 void hex2bcd() __naked {
