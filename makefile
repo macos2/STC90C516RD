@@ -1,4 +1,4 @@
-opt= -DUSE_FLOATS=1 -mmcs51 --model-medium 
+opt= -mmcs51 --model-medium # -DUSE_FLOATS=1
 all:main.hex
 
 clean:
