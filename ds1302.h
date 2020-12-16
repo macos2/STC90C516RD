@@ -21,6 +21,6 @@ unsigned char ds1302_read(Ds1302 *dev, unsigned is_ram_data, unsigned char addr)
 
 void ds1302_set_date(Ds1302 *dev,unsigned char year,unsigned char month,unsigned char day);
 void ds1302_set_time(Ds1302 *dev,unsigned char hour,unsigned char minute,unsigned char second);
-
+void ds1302_get_time(Ds1302 *dev,unsigned char *result_bcd_buf_x7);
 
 #endif /* DS1302_H_ */

@@ -97,3 +97,10 @@ void ds1302_set_time(Ds1302 *dev, unsigned char hour, unsigned char minute,
 	ds1302_write(dev, 0, 0x02, __tmp); //hour
 
 }
+
+void ds1302_get_time(Ds1302 *dev,unsigned char *result_bcd_buf_x7){
+	unsigned char i;
+	for(i=0;i<7;i++){
+		result_bcd_buf_x7[i]=ds1302_read(dev,0,i);
+	}
+}
