@@ -1,4 +1,5 @@
 #include "gpio.h"
+#include "stdio.h"
 
 #ifndef LM032L_H_
 #define LM032L_H_
@@ -26,6 +27,6 @@ unsigned char lm032l_read_data(lm032l *lcd,unsigned char addr);
 void lm032l_write_data(lm032l *lcd,unsigned char addr,unsigned char D);
 void lm032l_write_data_direct(lm032l *lcd,unsigned char D);
 void lm032l_write_code(lm032l *lcd,unsigned char D);
-void lm032l_write_string(lm032l *lcd,unsigned char addr,char *d,unsigned char len);
+void lm032l_write_string(lm032l *lcd,unsigned char addr,char *fmt,...);
 
 #endif

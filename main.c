@@ -10,6 +10,7 @@
 
 __xdata lm032l lcd;
 __xdata Ds1302 clock_dev;
+__xdata unsigned int timer0;
 __xdata unsigned char usart_buf[256],one_wire_dev[256];
 
 
@@ -24,13 +25,23 @@ void usart_send(char *fmt,...){
 
 }
 
+void timer0_interrupt() __interrupt 1{
+	unsigned char buf[7];
+	timer0++;
+	if(timer0==400){
+		timer0=0;
+		ds1302_get_time(&clock_dev,buf);
+		lm032l_write_string(&lcd,0x40,"20%02d-%02x-%02x %02x:%02x:%02x",buf[6],buf[4],buf[3],buf[2],buf[1],buf[0]);
+	}
+}
+
 void usart_interrupt() __interrupt 4{
 	unsigned char t;
 	if(RI==1){
 		RI=0;
 		t=SBUF;
 		SBUF=t;
-		ds18b20_test();
+		//ds18b20_test();
 		ds1302_test();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
@@ -48,7 +59,7 @@ void usart_interrupt() __interrupt 4{
 
 void usart_init(){
 	SCON=0x50;
-	TMOD=0x20;
+	TMOD|=0x20;
 	PCON=0x80;
 	TH1=253;
 	TL1=253;
@@ -58,16 +69,24 @@ void usart_init(){
 	EA=1;
 	usart_buf[254]=0;
 	usart_buf[255]=0;
+}
 
+void timer0_init(){
+	TMOD|=0x02;
+	TL0=6;
+	TH0=6;
+	ET0=1;
+	TR0=1;
+	timer0=0;
 }
 
 void lcd_init(){
-	lcd.DATA=gpio_format(0,GPIO_ALL_PIN);
+	lcd.DATA=gpio_format(1,GPIO_ALL_PIN);
 	lcd.E=gpio_format(3,3);
 	lcd.RS=gpio_format(2,6);
 	lcd.RW=gpio_format(2,5);
 	lm032l_init(&lcd);
-	lm032l_write_string(&lcd,0x00,"Hello",5);
+	lm032l_write_string(&lcd,0x00,"Hello");
 }
 
 void ds18b20_test(){
@@ -81,6 +100,7 @@ void ds18b20_test(){
 		}
 		usart_send("\r\n");
 	}
+
 }
 
 void ds1302_init(){
@@ -92,12 +112,10 @@ void ds1302_init(){
 }
 
 void ds1302_test(){
-	unsigned char i,tmp;
+	unsigned char buf[7];
+	ds1302_get_time(&clock_dev,buf);
 	usart_send("\r\nclock:\r\n");
-	for(i=0;i<9;i++){
-		ds1302_read(&clock_dev,1,i,&tmp);
-		usart_send("%02x ",tmp);
-	}
+	usart_send("20%02d-%02x-%02x %02x:%02x:%02x",buf[6],buf[4],buf[3],buf[2],buf[1],buf[0]);
 	usart_send("\r\n");
 }
 
@@ -105,6 +123,7 @@ void main(){
 	gpio io=gpio_format(1,7);
 	lcd_init();
 	usart_init();
+	timer0_init();
 	ds18b20_test();
 	ds1302_init();
 	ds1302_test();

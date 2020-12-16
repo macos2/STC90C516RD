@@ -80,12 +80,19 @@ void lm032l_write_code(lm032l *lcd,unsigned char D){
 	gpio_set(lcd->E,0);
 }
 
-void lm032l_write_string(lm032l *lcd,unsigned char addr,char *d,unsigned char len){
-	unsigned char i=0;
-	if(len==0)return;
-	lm032l_write_data(lcd,addr,d[i]);
-	while(i<(len-1)){
-		i++;
-		lm032l_write_data_direct(lcd,d[i]);
+void lm032l_write_string(lm032l *lcd,unsigned char addr,char *fmt,...){
+	char buf[128];
+	unsigned char len,i;
+	va_list ap;
+	va_start(ap,fmt);
+	len=vsprintf(buf,fmt,ap);
+	va_end(ap);
+	if(len==0){
+		return;
 	}
+	lm032l_write_data(lcd,addr,buf[0]);
+	for(i=1;i<len;i++){
+		lm032l_write_data_direct(lcd,buf[i]);
+	}
+
 }
