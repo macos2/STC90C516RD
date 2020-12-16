@@ -102,10 +102,15 @@ void ds1302_test(){
 }
 
 void main(){
+	gpio io=gpio_format(1,7);
 	lcd_init();
 	usart_init();
 	ds18b20_test();
 	ds1302_init();
 	ds1302_test();
-	while(1);
+
+	while(1){
+		gpio_set(io,0);
+		gpio_set(io,1);
+	};
 }

@@ -12,31 +12,48 @@
 #define GET_PORT(x) case x: return P##x;break;
 #define GET_PIN(x)  case x: switch (port){ case 0:return P0##x;break; case 1:return P1##x;break; case 2:return P2##x;break; case 3:return P3##x;break; case 4:return P4##x;break;}break;
 
-
-
+//this is a test
+unsigned char __port,__pin,__value;
 void gpio_set(gpio io,unsigned char value) {
-	unsigned char port=io>>4;
-	unsigned char pin=io&0x0f;
-	switch(pin){
-		case GPIO_ALL_PIN:
-			switch(port){
-				SET_PORT(0);
-				SET_PORT(1);
-				SET_PORT(2);
-				SET_PORT(3);
-				SET_PORT(4);
-			}
-			break;
-		SET_PIN(0)
-		SET_PIN(1)
-		SET_PIN(2)
-		SET_PIN(3)
-		SET_PIN(4)
-		SET_PIN(5)
-		SET_PIN(6)
-		SET_PIN(7)
-	};
+		__port=io>>4;
+		__pin=io&0x0f;
+
+		__asm
+		MOV A,___port
+		CJNE A,#00,$00001
+		MOV A,___pin ;Port0
+		CJNE A,#15,$
+		CJNE A,#15,$
+
+		CJNE A,#01,$00002
+		CJNE A,#02,$00003
+		CJNE A,#03,$00004
+		__endasm;
 }
+
+//void gpio_set(gpio io,unsigned char value) {
+//	unsigned char port=io>>4;
+//	unsigned char pin=io&0x0f;
+//	switch(pin){
+//		case GPIO_ALL_PIN:
+//			switch(port){
+//				SET_PORT(0);
+//				SET_PORT(1);
+//				SET_PORT(2);
+//				SET_PORT(3);
+//				SET_PORT(4);
+//			}
+//			break;
+//		SET_PIN(0)
+//		SET_PIN(1)
+//		SET_PIN(2)
+//		SET_PIN(3)
+//		SET_PIN(4)
+//		SET_PIN(5)
+//		SET_PIN(6)
+//		SET_PIN(7)
+//	};
+//}
 
 unsigned char gpio_get(gpio io) {
 	unsigned char port=io>>4;
