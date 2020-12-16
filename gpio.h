@@ -31,7 +31,7 @@
 #define GPIO_PIN_07 0x07
 
 void gpio_set(gpio io,unsigned char value) __naked;
-unsigned char gpio_get(gpio io);
+unsigned char gpio_get(gpio io) ;
 gpio gpio_format(unsigned char port,unsigned char pin);
 
 #endif /* 80C51_GPIO_H_ */
