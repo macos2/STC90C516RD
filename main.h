@@ -13,6 +13,7 @@
 #include "one_wire_bus.h"
 #include "ds18b20.h"
 #include "ds1302.h"
+#include "i2c_bus.h"
 
 #define fosc 11059200
 #define baud 19200

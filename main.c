@@ -12,7 +12,7 @@ __xdata lm032l lcd;
 __xdata Ds1302 clock_dev;
 __xdata unsigned int timer0;
 __xdata unsigned char usart_buf[256],one_wire_dev[256];
-
+__xdata I2C_BUS iic;
 
 void ds18b20_test();
 void ds1302_test();
@@ -117,6 +117,11 @@ void ds1302_test(){
 	usart_send("\r\nclock:\r\n");
 	usart_send("20%02d-%02x-%02x %02x:%02x:%02x",buf[6],buf[4],buf[3],buf[2],buf[1],buf[0]);
 	usart_send("\r\n");
+}
+
+void iic_init(){
+	iic.scl=gpio_format(1,0);
+	iic.sda=gpio_format(1,2);
 }
 
 void main(){
