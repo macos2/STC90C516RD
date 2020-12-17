@@ -86,6 +86,7 @@ void lm032l_write_string(lm032l *lcd,unsigned char addr,char *fmt,...){
 	va_list ap;
 	va_start(ap,fmt);
 	len=vsprintf(buf,fmt,ap);
+	buf[len]='\0';
 	va_end(ap);
 	if(len==0){
 		return;

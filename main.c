@@ -28,10 +28,11 @@ void usart_send(char *fmt,...){
 void timer0_interrupt() __interrupt 1{
 	unsigned char buf[7];
 	timer0++;
-	if(timer0==400){
+	if(timer0==1000){
 		timer0=0;
 		ds1302_get_time(&clock_dev,buf);
-		lm032l_write_string(&lcd,0x40,"20%02d-%02x-%02x %02x:%02x:%02x",buf[6],buf[4],buf[3],buf[2],buf[1],buf[0]);
+		lm032l_write_string(&lcd,0x00,"20%02d-%02x-%02x",buf[6],buf[4],buf[3]);
+		lm032l_write_string(&lcd,0x40,"%02x:%02x:%02x",buf[2],buf[1],buf[0]);
 	}
 }
 
@@ -81,8 +82,8 @@ void timer0_init(){
 }
 
 void lcd_init(){
-	lcd.DATA=gpio_format(1,GPIO_ALL_PIN);
-	lcd.E=gpio_format(3,3);
+	lcd.DATA=gpio_format(0,GPIO_ALL_PIN);
+	lcd.E=gpio_format(2,7);
 	lcd.RS=gpio_format(2,6);
 	lcd.RW=gpio_format(2,5);
 	lm032l_init(&lcd);
@@ -104,9 +105,9 @@ void ds18b20_test(){
 }
 
 void ds1302_init(){
-	clock_dev.io=gpio_format(1,4);
-	clock_dev.rst=gpio_format(1,5);
-	clock_dev.sclk=gpio_format(1,6);
+	clock_dev.io=gpio_format(3,4);
+	clock_dev.rst=gpio_format(3,5);
+	clock_dev.sclk=gpio_format(3,6);
 	ds1302_set_date(&clock_dev,1,2,3);
 	ds1302_set_time(&clock_dev,4,5,6);
 }
@@ -126,12 +127,15 @@ void iic_init(){
 
 void main(){
 	gpio io=gpio_format(1,7);
-	lcd_init();
+
 	usart_init();
+
 	timer0_init();
+	lcd_init();
 	ds18b20_test();
 	ds1302_init();
 	ds1302_test();
+
 	while(1){
 		gpio_set(io,0);
 		gpio_set(io,1);
