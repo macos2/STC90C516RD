@@ -15,7 +15,6 @@
 					 	case 0x##i##F:result=P##i;break;
 
 void gpio_set(gpio io,unsigned char value) {
-	if((io&0x0f)!=0x0f)value=value>0?0x01:0x00;
 	switch (io){
 	SET_IO(0)
 	SET_IO(1)
@@ -24,7 +23,6 @@ void gpio_set(gpio io,unsigned char value) {
 	SET_IO(4)
 	default:break;
 	}
-	__asm__("RET");
 }
 
 unsigned char gpio_get(gpio io){

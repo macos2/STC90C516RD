@@ -8,7 +8,7 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 #include "stc89xx_stc90xx.h"
-
+//#include <mcs51/at89x52.h>
 
 /* Format the gpio in a 8bit value like 0bFFFF PPPP
  * FFFF:port value of the gpio
@@ -30,7 +30,7 @@
 #define GPIO_PIN_06 0x06
 #define GPIO_PIN_07 0x07
 
-void gpio_set(gpio io,unsigned char value) __naked;
+void gpio_set(gpio io,unsigned char value);
 unsigned char gpio_get(gpio io) ;
 gpio gpio_format(unsigned char port,unsigned char pin);
 

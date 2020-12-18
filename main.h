@@ -9,10 +9,6 @@
 #define MAIN_H_
 #include <stdio.h>
 #include "gpio.h"
-#include "LM032L.h"
-#include "one_wire_bus.h"
-#include "ds18b20.h"
-#include "ds1302.h"
 #include "i2c_bus.h"
 
 #define fosc 11059200

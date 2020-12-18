@@ -8,14 +8,10 @@
 
 #include "main.h"
 
-__xdata lm032l lcd;
-__xdata Ds1302 clock_dev;
 __xdata unsigned int timer0;
-__xdata unsigned char usart_buf[256],one_wire_dev[256];
-__xdata I2C_BUS iic;
+__xdata unsigned char usart_buf[256];
+I2C_BUS iic;
 
-void ds18b20_test();
-void ds1302_test();
 void iic_test();
 
 void usart_send(char *fmt,...){
@@ -27,13 +23,9 @@ void usart_send(char *fmt,...){
 }
 
 void timer0_interrupt() __interrupt 1{
-	unsigned char buf[7];
 	timer0++;
 	if(timer0==1000){
 		timer0=0;
-		ds1302_get_time(&clock_dev,buf);
-		lm032l_write_string(&lcd,0x00,"20%02d-%02x-%02x",buf[6],buf[4],buf[3]);
-		lm032l_write_string(&lcd,0x40,"%02x:%02x:%02x",buf[2],buf[1],buf[0]);
 	}
 }
 
@@ -43,9 +35,7 @@ void usart_interrupt() __interrupt 4{
 		RI=0;
 		t=SBUF;
 		SBUF=t;
-		//ds18b20_test();
-		//ds1302_test();
-		//iic_test();
+		iic_test();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
 		TI=0;
@@ -83,45 +73,6 @@ void timer0_init(){
 	timer0=0;
 }
 
-void lcd_init(){
-	lcd.DATA=gpio_format(1,GPIO_ALL_PIN);
-	lcd.E=gpio_format(3,3);
-	lcd.RS=gpio_format(2,6);
-	lcd.RW=gpio_format(2,5);
-	lm032l_init(&lcd);
-	lm032l_write_string(&lcd,0x00,"Hello");
-}
-
-void ds18b20_test(){
-	unsigned char i,j;
-	unsigned char num=one_wire_bus_search_rom(0,one_wire_dev,6);
-	usart_send("get %d device\r\n",num);
-	for(i=0;i<num;i++){
-		usart_send("Dev%d: ",i);
-		for(j=0;j<8;j++){
-			usart_send("%02x ",one_wire_dev[j+8*i]);
-		}
-		usart_send("\r\n");
-	}
-
-}
-
-void ds1302_init(){
-	clock_dev.io=gpio_format(1,4);
-	clock_dev.rst=gpio_format(1,5);
-	clock_dev.sclk=gpio_format(1,6);
-	ds1302_set_date(&clock_dev,1,2,3);
-	ds1302_set_time(&clock_dev,4,5,6);
-}
-
-void ds1302_test(){
-	unsigned char buf[7];
-	ds1302_get_time(&clock_dev,buf);
-	usart_send("\r\nclock:\r\n");
-	usart_send("20%02d-%02x-%02x %02x:%02x:%02x",buf[6],buf[4],buf[3],buf[2],buf[1],buf[0]);
-	usart_send("\r\n");
-}
-
 void iic_init(){
 	iic.sck=gpio_format(1,0);
 	iic.sda=gpio_format(1,1);
@@ -142,18 +93,15 @@ void main(){
 	gpio io=gpio_format(1,7);
 	usart_init();
 	//timer0_init();
-	lcd_init();
-	//ds18b20_test();
-//	ds1302_init();
-//	ds1302_test();
-
 	iic_init();
-	iic_test();
+	//iic_test();
 	while(1){
 		i2c_start(&iic);
-		i2c_send_7bit_addr(&iic,0b0101000,0);
-		i2c_write(&iic,0x33);
+		i2c_send_7bit_addr(&iic,0b0101010,1);
+		i2c_write(&iic,0x00);
 		i2c_stop(&iic);
+		while(i--);
+		i=0xff;
 		while(i--);
 		i=0xff;
 	};
