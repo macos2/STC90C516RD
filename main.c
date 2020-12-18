@@ -16,6 +16,7 @@ __xdata I2C_BUS iic;
 
 void ds18b20_test();
 void ds1302_test();
+void iic_test();
 
 void usart_send(char *fmt,...){
 	 va_list list;
@@ -43,7 +44,8 @@ void usart_interrupt() __interrupt 4{
 		t=SBUF;
 		SBUF=t;
 		//ds18b20_test();
-		ds1302_test();
+		//ds1302_test();
+		//iic_test();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
 		TI=0;
@@ -82,8 +84,8 @@ void timer0_init(){
 }
 
 void lcd_init(){
-	lcd.DATA=gpio_format(0,GPIO_ALL_PIN);
-	lcd.E=gpio_format(2,7);
+	lcd.DATA=gpio_format(1,GPIO_ALL_PIN);
+	lcd.E=gpio_format(3,3);
 	lcd.RS=gpio_format(2,6);
 	lcd.RW=gpio_format(2,5);
 	lm032l_init(&lcd);
@@ -105,9 +107,9 @@ void ds18b20_test(){
 }
 
 void ds1302_init(){
-	clock_dev.io=gpio_format(3,4);
-	clock_dev.rst=gpio_format(3,5);
-	clock_dev.sclk=gpio_format(3,6);
+	clock_dev.io=gpio_format(1,4);
+	clock_dev.rst=gpio_format(1,5);
+	clock_dev.sclk=gpio_format(1,6);
 	ds1302_set_date(&clock_dev,1,2,3);
 	ds1302_set_time(&clock_dev,4,5,6);
 }
@@ -121,23 +123,38 @@ void ds1302_test(){
 }
 
 void iic_init(){
-	iic.scl=gpio_format(1,0);
-	iic.sda=gpio_format(1,2);
+	iic.sck=gpio_format(1,0);
+	iic.sda=gpio_format(1,1);
+}
+
+void iic_test(){
+	unsigned char ack=1,addr=0b1010000;
+	i2c_start(&iic);
+	ack=i2c_send_7bit_addr(&iic,addr,0);
+	usart_send("send address:%02x ack:%02x\r\n",addr,ack);
+	ack=i2c_write(&iic,0x55);
+	usart_send("send data:%02x ack:%02x\r\n",0x55,ack);
+	i2c_stop(&iic);
 }
 
 void main(){
+	unsigned char i=0xff;
 	gpio io=gpio_format(1,7);
-
 	usart_init();
-
-	timer0_init();
+	//timer0_init();
 	lcd_init();
-	ds18b20_test();
-	ds1302_init();
-	ds1302_test();
+	//ds18b20_test();
+//	ds1302_init();
+//	ds1302_test();
 
+	iic_init();
+	iic_test();
 	while(1){
-		gpio_set(io,0);
-		gpio_set(io,1);
+		i2c_start(&iic);
+		i2c_send_7bit_addr(&iic,0b0101000,0);
+		i2c_write(&iic,0x33);
+		i2c_stop(&iic);
+		while(i--);
+		i=0xff;
 	};
 }
