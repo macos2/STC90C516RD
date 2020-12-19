@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "gpio.h"
 #include "i2c_bus.h"
+#include "spi_bus.h"
 
 #define fosc 11059200
 #define baud 19200
