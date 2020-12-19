@@ -36,7 +36,7 @@ void usart_interrupt() __interrupt 4{
 		RI=0;
 		t=SBUF;
 		SBUF=t;
-		//iic_test();
+		iic_test();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
 		TI=0;
@@ -75,32 +75,35 @@ void timer0_init(){
 }
 
 void iic_init(){
-	unsigned char i,p=0;
-	iic.sck=gpio_format(1,0);
-	iic.sda=gpio_format(1,1);
-	for(i=0;i<127;i++){
-		i2c_start(&iic);
-		if(i2c_send_7bit_addr(&iic,i,1)==0){
-			i2c_dev[p]=i;
-			p++;
-		}
-		i2c_stop(&iic);
-	}
-	usart_send("\r\nGet i2c dev addr: ");
-	for(i=0;i<p;i++){
-		usart_send("0x%02x ",i2c_dev[i]);
-	}
-	usart_send("\r\n");
+
+	iic.sck=gpio_format(2,1);
+	iic.sda=gpio_format(2,0);
+	iic_test();
 }
 
 void iic_test(){
-	unsigned char ack=1,addr=0b1010000;
-	i2c_start(&iic);
-	ack=i2c_send_7bit_addr(&iic,addr,0);
-	usart_send("send address:%02x ack:%02x\r\n",addr,ack);
-	ack=i2c_write(&iic,0x55);
-	usart_send("send data:%02x ack:%02x\r\n",0x55,ack);
-	i2c_stop(&iic);
+//	unsigned char ack=1,addr=0b1010000;
+//	i2c_start(&iic);
+//	ack=i2c_send_7bit_addr(&iic,addr,0);
+//	usart_send("send address:%02x ack:%02x\r\n",addr,ack);
+//	ack=i2c_write(&iic,0x55);
+//	usart_send("send data:%02x ack:%02x\r\n",0x55,ack);
+//	i2c_stop(&iic);
+	unsigned char i,p=0;
+	for(i=0;i<127;i++){
+			i2c_start(&iic);
+			if(i2c_send_7bit_addr(&iic,i,1)==0){
+				i2c_dev[p]=i;
+				p++;
+			}
+			i2c_stop(&iic);
+		}
+		usart_send("\r\nGet i2c dev addr: ");
+		for(i=0;i<p;i++){
+			usart_send("0x%02x ",i2c_dev[i]);
+		}
+		usart_send("\r\n");
+		//get 0x48 0x50 0x51 0x52 0x53 0x54 0x55 0x56 0x57
 }
 
 void spi_main_init(){
