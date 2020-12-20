@@ -21,6 +21,15 @@ void i2c_stop(I2cBus *bus) {
 	gpio_set(bus->sda, 1);
 }
 
+void i2c_reset(I2cBus *bus){
+	unsigned char i;
+	for(i=0;i<8;i++){
+		gpio_set(bus->sck, 0);
+		gpio_set(bus->sck, 1);
+	}
+	i2c_stop(bus);
+}
+
 unsigned char i2c_read(I2cBus *bus, unsigned char no_ack) {
 	unsigned char result = 0, i;
 	gpio_set(bus->sda, 1);

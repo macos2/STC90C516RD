@@ -14,6 +14,7 @@ __xdata I2cBus iic;
 __xdata SpiBus spi;
 
 void iic_test();
+void iic_eeprom();
 
 void usart_send(char *fmt,...){
 	 va_list list;
@@ -36,7 +37,8 @@ void usart_interrupt() __interrupt 4{
 		RI=0;
 		t=SBUF;
 		SBUF=t;
-		iic_test();
+		//iic_test();
+		iic_eeprom();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
 		TI=0;
@@ -79,6 +81,7 @@ void iic_init(){
 	iic.sck=gpio_format(2,1);
 	iic.sda=gpio_format(2,0);
 	iic_test();
+	iic_eeprom();
 }
 
 void iic_test(){
@@ -105,6 +108,30 @@ void iic_test(){
 		usart_send("\r\n");
 		//get 0x48 0x50 0x51 0x52 0x53 0x54 0x55 0x56 0x57
 }
+
+void iic_eeprom(){
+	unsigned char i;
+	i2c_reset(&iic);
+	i2c_start(&iic);
+	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x50,0));
+	usart_send("send write addr:%x\r\n",i2c_write(&iic,0x00));
+	for(i=0;i<8;i++){
+		usart_send("write data:%x\r\n",i2c_write(&iic,i));
+	}
+	i2c_stop(&iic);
+	usart_send("read from eeprom\r\n");
+	i2c_start(&iic);
+	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x50,0));
+	usart_send("send write addr:%x\r\n",i2c_write(&iic,0x00));
+	i2c_start(&iic);
+	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x50,1));
+	for(i=0;i<8;i++){
+		usart_send("read @%x :%x\r\n",i,i2c_read(&iic,0));
+	}
+	i2c_read(&iic,1);
+	i2c_stop(&iic);
+}
+
 
 void spi_main_init(){
 	spi.CPHA=0;

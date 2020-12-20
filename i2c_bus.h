@@ -21,6 +21,7 @@ typedef struct {
  */
 void i2c_start(I2cBus *bus);
 void i2c_stop(I2cBus *bus);
+void i2c_reset(I2cBus *bus);
 
 /*
  * The Standard I2C Operation

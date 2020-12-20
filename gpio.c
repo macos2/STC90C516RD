@@ -19,7 +19,6 @@
 							tmp=tmp&(0x01<<(io&0x0f));\
 							tmp=tmp>0?0x01:0x00;\
 						};\
-						return tmp;\
 						break;
 
 //#define SET_IO(i)	case 0x##i##0:\
