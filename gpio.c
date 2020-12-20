@@ -15,8 +15,8 @@
 
 #define GET_IO(i)	case 0x##i##0:\
 						tmp=P##i;\
-						if((io&0x0f)!=0x0f){\
-							tmp=tmp&(0x01<<(io&0x0f));\
+						if(pin!=0x0f){\
+							tmp=tmp&(0x01<<pin);\
 							tmp=tmp>0?0x01:0x00;\
 						};\
 						break;
@@ -44,8 +44,8 @@ void gpio_set(gpio io,unsigned char value) {
 }
 
 unsigned char gpio_get(gpio io){
-	unsigned char tmp=0x00;
-	switch(io){
+	unsigned char tmp=0x00,pin=io&0x0f;
+	switch(io&0xf0){
 	GET_IO(0)
 		GET_IO(1)
 		GET_IO(2)
