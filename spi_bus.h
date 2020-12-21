@@ -21,6 +21,8 @@ typedef struct {
 } SpiBus;
 
 void spi_init(SpiBus *bus);
+void spi_set_cs(SpiBus *bus,unsigned char cs);
+
 void spi_write(SpiBus *bus,unsigned char data);
 unsigned char spi_read(SpiBus *bus);
 

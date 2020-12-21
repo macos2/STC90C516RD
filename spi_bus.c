@@ -13,10 +13,13 @@ void spi_init(SpiBus *bus){
 	gpio_set(bus->SCK,bus->CPOL);
 }
 
+void spi_set_cs(SpiBus *bus,unsigned char cs){
+	gpio_set(bus->CS,cs);
+}
+
 
 void spi_write(SpiBus *bus,unsigned char data){
 	unsigned char i,tmp;
-gpio_set(bus->CS,0);
 for(i=0;i<8;i++){
 	if(bus->MSB_FIRST){
 		tmp=(data&0x80)?0x01:0x00;
@@ -36,12 +39,10 @@ for(i=0;i<8;i++){
 		gpio_set(bus->SCK,bus->CPOL);
 	}
 }
-gpio_set(bus->CS,1);
 }
 
 unsigned char spi_read(SpiBus *bus){
 	unsigned char i,tmp,result=0x00;
-gpio_set(bus->CS,0);
 for(i=0;i<8;i++){
 	if(bus->CPHA){
 		gpio_set(bus->SCK,(~bus->CPOL)&0x01);
@@ -59,6 +60,5 @@ for(i=0;i<8;i++){
 		result|=tmp<<i;
 	}
 }
-gpio_set(bus->CS,1);
 return result;
 }

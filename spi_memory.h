@@ -24,11 +24,11 @@
 
 typedef struct{
 	SpiBus *bus;
-	unsigned char page_size;
+	unsigned int page_size;
 	unsigned char spi_n_bit_address;
 }SpiMemory;
 
-void spi_memory_read(SpiMemory *mem,,unsigned char buf,unsigned char buf_len);
-void spi_memory_write(SpiMemory *mem,unsigned char buf,unsigned char buf_len);
+void spi_memory_read(SpiMemory *mem,,unsigned char buf,unsigned int buf_len);
+void spi_memory_write(SpiMemory *mem,unsigned char buf,unsigned int buf_len);
 
 #endif /* SPI_MEMORY_H_ */
