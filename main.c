@@ -11,7 +11,7 @@
 __xdata unsigned int timer0;
 __xdata unsigned char usart_buf[256],i2c_dev[10];
 __xdata I2cBus iic;
-__xdata I2cMemory i2c_mem;
+//__xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
 
 void iic_test();
@@ -81,11 +81,11 @@ void timer0_init(){
 
 void iic_init(){
 
-	iic.sck=gpio_format(1,0);
-	iic.sda=gpio_format(1,1);
-	i2c_mem.bus=&iic;
-	i2c_mem.dev_addr=0x50;
-	i2c_mem.page_size=8;
+	iic.sck=gpio_format(2,1);
+	iic.sda=gpio_format(2,0);
+//	i2c_mem.bus=&iic;
+//	i2c_mem.dev_addr=0x50;
+//	i2c_mem.page_size=8;
 	//iic_test();
 	//iic_eeprom();
 }
@@ -116,46 +116,46 @@ void iic_test(){
 }
 
 void iic_eeprom(){
-//	unsigned char i;
-////	i2c_reset(&iic);
+	unsigned char i;
 //	i2c_start(&iic);
-//	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x53,0));
+//	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x50,0));
 //	usart_send("send write addr:%x\r\n",i2c_write(&iic,0x00));
 //	for(i=0;i<8;i++){
-//		usart_send("write data:%x\r\n",i2c_write(&iic,i));
+//		usart_send("write data:%x\r\n",i2c_write(&iic,i<<4));
 //	}
 //	i2c_stop(&iic);
-////	i2c_reset(&iic);
 //	i=1;
 //	while(i!=0){
 //		i2c_start(&iic);
-//		i=i2c_send_7bit_addr(&iic,0x53,1);
+//		i=i2c_send_7bit_addr(&iic,0x50,1);
 //		i2c_stop(&iic);
 //	}
-//	usart_send("read from eeprom\r\n");
-//	i2c_start(&iic);
-//	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x53,0));
-//	usart_send("send write addr:%x\r\n",i2c_write(&iic,0x04));
-//	i2c_start(&iic);
-//	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x53,1));
-//	for(i=0;i<8;i++){
-//		usart_send("read @%x :%02x\r\n",i,i2c_read(&iic,0));
-//	}
-//	i2c_read(&iic,1);
-//	i2c_stop(&iic);
-	unsigned char i,buf[25];
-	for(i=0;i<25;i++){
-		buf[i]=i;
-	}
-	i=i2c_memory_write(&i2c_mem,0x00,25,buf);
-	if(i!=25)usart_send("write i2c memory fail\r\n");
 
-	i=i2c_memory_read(&i2c_mem,0x00,25,buf);
-	if(i!=25)usart_send("read i2c memory fail\r\n");
-	usart_send("\r\nbuf:\r\n");
-	for(i=0;i<25;i++){
-		usart_send("@%d: 0x%02x\r\n",i,buf[i]);
+	usart_send("read from eeprom\r\n");
+	i2c_start(&iic);
+	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x50,0));
+	usart_send("send write addr:%x\r\n",i2c_write(&iic,0x00));
+	i2c_start(&iic);
+	usart_send("send 7bit addr:%x\r\n",i2c_send_7bit_addr(&iic,0x50,1));
+	for(i=0;i<8;i++){
+		usart_send("@%x :%02x\r\n",i,i2c_read(&iic,0));
 	}
+	i2c_read(&iic,1);
+	i2c_stop(&iic);
+
+//	unsigned char i,buf[25];
+//	for(i=0;i<25;i++){
+//		buf[i]=i;
+//	}
+//	i=i2c_memory_write(&i2c_mem,0x00,25,buf);
+//	if(i!=25)usart_send("write i2c memory fail\r\n");
+//
+//	i=i2c_memory_read(&i2c_mem,0x00,25,buf);
+//	if(i!=25)usart_send("read i2c memory fail\r\n");
+//	usart_send("\r\nbuf:\r\n");
+//	for(i=0;i<25;i++){
+//		usart_send("@%d: 0x%02x\r\n",i,buf[i]);
+//	}
 }
 
 
@@ -183,7 +183,7 @@ void main(){
 	usart_init();
 	//timer0_init();
 	iic_init();
-	spi_main_init();
+	//spi_main_init();
 	//iic_test();
 	while(1){
 //		i2c_start(&iic);
