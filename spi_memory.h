@@ -12,8 +12,8 @@
 
 #define SPI_MEMORY_WRITE_ENABLE 0b00000110
 #define SPI_MEMORY_WRITE_DISABLE 0b00000100
-#define SPI_MEMORY_WRITE_STATUS 0b00000101
-#define SPI_MEMORY_READ_STATUS 0b00000001
+#define SPI_MEMORY_READ_STATUS 0b00000101
+#define SPI_MEMORY_WRITE_STATUS 0b00000001
 #define SPI_MEMORY_READ 0b00000011
 #define SPI_MEMORY_WRITE 0b00000010
 
@@ -29,7 +29,7 @@ typedef struct{
 	unsigned char n_bit_address;//example:SPI_MEMORY_8_BIT_ADDRESS
 }SpiMemory;
 
-void spi_memory_read(SpiMemory *mem,unsigned long addr,unsigned char buf,unsigned int buf_len);
-void spi_memory_write(SpiMemory *mem,unsigned long addr,unsigned char buf,unsigned int buf_len);
+void spi_memory_read(SpiMemory *mem,unsigned long addr,unsigned char *buf,unsigned int buf_len);
+unsigned int spi_memory_write(SpiMemory *mem,unsigned long addr,unsigned char *buf,unsigned int buf_len);
 
 #endif /* SPI_MEMORY_H_ */

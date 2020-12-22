@@ -13,6 +13,7 @@ __xdata unsigned char usart_buf[256],usart_p,usart_e,i2c_dev[10];
 __xdata I2cBus iic;
 __xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
+__xdata SpiMemory spi_mem;
 
 void iic_test();
 void iic_eeprom();
@@ -43,8 +44,8 @@ void usart_interrupt() __interrupt 4{
 		t=SBUF;
 		SBUF=t;
 		//iic_test();
-		iic_eeprom();
-		//spi_test();
+		//iic_eeprom();
+		spi_test();
 		//long_t();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
@@ -174,12 +175,28 @@ void spi_main_init(){
 	spi.SCK=gpio_format(1,2);
 	spi.CS=gpio_format(1,5);
 	spi_init(&spi);
+	spi_mem.bus=&spi;
+	spi_mem.n_bit_address=SPI_MEMORY_8_BIT_ADDRESS;
+	spi_mem.page_size=16;
 }
 
 void spi_test(){
-	spi_write(&spi,0x55);
-	spi_write(&spi,0x55);
+	unsigned char buf[25],i,temp;
+	spi_set_cs(&spi,0);
+	spi_write(&spi,SPI_MEMORY_WRITE_ENABLE);
+	spi_set_cs(&spi,1);
 	usart_send("SPI READ:%02x\r\n",spi_read(&spi));
+	spi_memory_read(&spi_mem,0,buf,25);
+	usart_send("\r\nspi memory test\r\n");
+	for(i=0;i<25;i++){
+		usart_send("%02x ",buf[i]);
+	}
+	usart_send("\r\n");
+	for(i=0;i<25;i++){
+		buf[i]=i;
+	}
+	temp=spi_memory_write(&spi_mem,0,buf,25);
+	if(temp==0)usart_send("\r\nWrite Failed\r\n");
 }
 
 
@@ -188,8 +205,8 @@ void main(){
 	gpio io=gpio_format(1,7);
 	usart_init();
 	//timer0_init();
-	iic_init();
-	//spi_main_init();
+	//iic_init();
+	spi_main_init();
 	//iic_test();
 	while(1){
 //		i2c_start(&iic);
