@@ -9,8 +9,8 @@
 #include "i2c_memory.h"
 #define OVERTIME 100
 
-unsigned char i2c_memory_read(I2cMemory *mem,unsigned int addr,unsigned char buf_size,unsigned char *buf){
-	unsigned char i,j=0,ack;
+unsigned char i2c_memory_read(I2cMemory *mem,unsigned long addr,unsigned char buf_size,unsigned char *buf){
+	unsigned char i,j=0,ack,*p;
 
 
 	do{
@@ -23,7 +23,12 @@ unsigned char i2c_memory_read(I2cMemory *mem,unsigned int addr,unsigned char buf
 		i2c_stop(mem->bus);
 		return 0;
 	}
-	i2c_write(mem->bus,addr);
+
+	p=&addr;
+	for(i=0;i<=(mem->n_bit_addr);i++){
+		i2c_write(mem->bus,p[mem->n_bit_addr-i]);
+	}
+
 
 	i2c_start(mem->bus);
 	ack=i2c_send_7bit_addr(mem->bus,mem->dev_addr,1);
@@ -41,8 +46,8 @@ unsigned char i2c_memory_read(I2cMemory *mem,unsigned int addr,unsigned char buf
 	return buf_size;
 }
 
-unsigned char i2c_memory_write(I2cMemory *mem,unsigned int addr,unsigned char buf_size,unsigned char *buf){
-	unsigned char *data,i,j=0,ack;
+unsigned char i2c_memory_write(I2cMemory *mem,unsigned long addr,unsigned char buf_size,unsigned char *buf){
+	unsigned char *data,i,j=0,ack,*p;
 
 	do{
 		i2c_stop(mem->bus);
@@ -56,7 +61,11 @@ unsigned char i2c_memory_write(I2cMemory *mem,unsigned int addr,unsigned char bu
 		return 0;
 	}
 
-	i2c_write(mem->bus,addr);
+	p=&addr;
+	for(i=0;i<=(mem->n_bit_addr);i++){
+		i2c_write(mem->bus,p[mem->n_bit_addr-i]);
+	}
+
 	data=buf;
 	for(i=0;i<buf_size;i++){
 			i2c_write(mem->bus,*data);

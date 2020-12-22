@@ -18,6 +18,8 @@ void iic_test();
 void iic_eeprom();
 void spi_test();
 
+
+
 void usart_send(char *fmt,...){
 	 va_list list;
 	 va_start(list,fmt);
@@ -25,6 +27,7 @@ void usart_send(char *fmt,...){
 	 va_end(list);
 
 }
+
 
 void timer0_interrupt() __interrupt 1{
 	timer0++;
@@ -42,6 +45,7 @@ void usart_interrupt() __interrupt 4{
 		//iic_test();
 		iic_eeprom();
 		//spi_test();
+		//long_t();
 		usart_send("received 0x%02x\r\n",t);
 	}else{
 		TI=0;
@@ -86,6 +90,7 @@ void iic_init(){
 	i2c_mem.bus=&iic;
 	i2c_mem.dev_addr=0x50;
 	i2c_mem.page_size=8;
+	i2c_mem.n_bit_addr=I2C_MEMORY_8_BIT_ADDRESS;
 	//iic_test();
 	//iic_eeprom();
 }

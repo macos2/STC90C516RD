@@ -17,18 +17,19 @@
 #define SPI_MEMORY_READ 0b00000011
 #define SPI_MEMORY_WRITE 0b00000010
 
-#define SPI_MEMORY_8_BIT_ADDRESS 8
-#define SPI_MEMORY_9_BIT_ADDRESS 9
-#define SPI_MEMORY_16_BIT_ADDRESS 16
-#define SPI_MEMORY_24_BIT_ADDRESS 24
+#define SPI_MEMORY_8_BIT_ADDRESS 0
+#define SPI_MEMORY_9_BIT_ADDRESS 10
+#define SPI_MEMORY_16_BIT_ADDRESS 1
+#define SPI_MEMORY_24_BIT_ADDRESS 2
+#define SPI_MEMORY_32_BIT_ADDRESS 3
 
 typedef struct{
 	SpiBus *bus;
 	unsigned int page_size;
-	unsigned char spi_n_bit_address;
+	unsigned char n_bit_address;//example:SPI_MEMORY_8_BIT_ADDRESS
 }SpiMemory;
 
-void spi_memory_read(SpiMemory *mem,,unsigned char buf,unsigned int buf_len);
-void spi_memory_write(SpiMemory *mem,unsigned char buf,unsigned int buf_len);
+void spi_memory_read(SpiMemory *mem,unsigned long addr,unsigned char buf,unsigned int buf_len);
+void spi_memory_write(SpiMemory *mem,unsigned long addr,unsigned char buf,unsigned int buf_len);
 
 #endif /* SPI_MEMORY_H_ */
