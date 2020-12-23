@@ -25,7 +25,10 @@ void usart_send(char *fmt,...){
 	 va_list list;
 	 va_start(list,fmt);
 	 usart_p+=vsprintf(usart_buf+usart_p,fmt,list);
-	 if(usart_e==0)SBUF=usart_buf[0];
+	 if(usart_e==0){
+		 SBUF=usart_buf[0];
+		 usart_e++;
+	 }
 	 va_end(list);
 }
 
@@ -51,8 +54,8 @@ void usart_interrupt() __interrupt 4{
 	}else{
 		TI=0;
 		if(usart_p>0){
-			usart_e++;
 			SBUF=usart_buf[usart_e];
+			usart_e++;
 			usart_p-=1;
 		}else{
 			usart_e=0;
