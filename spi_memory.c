@@ -41,7 +41,11 @@ unsigned int spi_memory_write(SpiMemory *mem, unsigned long addr, unsigned char 
 
 	if(j==WRITE_OVERTIME)return 0;
 
-	spi_write(mem->bus,SPI_MEMORY_WRITE_ENABLE);
+	spi_set_cs(mem->bus, 1);
+	spi_set_cs(mem->bus, 0);
+	spi_write(mem->bus, SPI_MEMORY_WRITE_ENABLE);
+	spi_set_cs(mem->bus, 1);
+	spi_set_cs(mem->bus, 0);
 	spi_write(mem->bus, SPI_MEMORY_WRITE);
 
 	for (i = 0; i <= mem->n_bit_address; i++) {

@@ -25,8 +25,8 @@ void usart_send(char *fmt,...){
 	 va_list list;
 	 va_start(list,fmt);
 	 usart_p+=vsprintf(usart_buf+usart_p,fmt,list);
+	 if(usart_e==0)SBUF=usart_buf[0];
 	 va_end(list);
-
 }
 
 
@@ -51,9 +51,9 @@ void usart_interrupt() __interrupt 4{
 	}else{
 		TI=0;
 		if(usart_p>0){
+			usart_e++;
 			SBUF=usart_buf[usart_e];
 			usart_p-=1;
-			usart_e+=1;
 		}else{
 			usart_e=0;
 		}
@@ -195,7 +195,7 @@ void spi_test(){
 	for(i=0;i<25;i++){
 		buf[i]=i;
 	}
-	temp=spi_memory_write(&spi_mem,0,buf,25);
+	temp=spi_memory_write(&spi_mem,16,buf,25);
 	if(temp==0)usart_send("\r\nWrite Failed\r\n");
 }
 
