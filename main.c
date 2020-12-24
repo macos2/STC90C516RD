@@ -25,8 +25,8 @@ void usart_send(char *fmt,...){
 	 va_list list;
 	 va_start(list,fmt);
 	 usart_p+=vsprintf(usart_buf+usart_p,fmt,list);
-	 if(usart_e==0){
-		 SBUF=usart_buf[0];
+	 if((usart_p-usart_e)!=0){
+		 SBUF=usart_buf[usart_e];
 		 usart_e++;
 	 }
 	 va_end(list);
@@ -56,9 +56,7 @@ void usart_interrupt() __interrupt 4{
 		if(usart_p>0){
 			SBUF=usart_buf[usart_e];
 			usart_e++;
-			usart_p-=1;
-		}else{
-			usart_e=0;
+			usart_p--;
 		}
 	}
 
@@ -204,13 +202,19 @@ void spi_test(){
 
 
 void main(){
-	unsigned char i=0xff;
+	unsigned int i;
+
 	gpio io=gpio_format(1,7);
 	usart_init();
 	//timer0_init();
 	//iic_init();
 	spi_main_init();
 	//iic_test();
+	i=crc7_calc(0x9876);
+	usart_send("crc7_calc(0x5555)=%02x\r\n",i);
+	i=crc7_calc(i<<7);
+	usart_send("crc7_calc(i<<7)=%02x\r\n",i);
+	//usart_send("crc16_calc(0x5555)=%04x\r\n",crc16_calc(0x55550000));
 	while(1){
 //		i2c_start(&iic);
 //		i2c_send_7bit_addr(&iic,0x46,0);
