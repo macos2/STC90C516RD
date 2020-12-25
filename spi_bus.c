@@ -10,7 +10,7 @@
 
 void spi_init(SpiBus *bus){
 	gpio_set(bus->CS,1);
-	gpio_set(bus->SCK,bus->CPOL);
+	gpio_set(bus->SCK,bus->cpol);
 }
 
 void spi_set_cs(SpiBus *bus,unsigned char cs){
@@ -29,14 +29,14 @@ for(i=0;i<8;i++){
 		data=data>>1;
 	}
 
-	if(bus->CPHA){
-		gpio_set(bus->SCK,(~bus->CPOL)&0x01);
+	if(bus->cpha){
+		gpio_set(bus->SCK,(~bus->cpol)&0x01);
 		gpio_set(bus->MOSI,tmp);
-		gpio_set(bus->SCK,bus->CPOL);
+		gpio_set(bus->SCK,bus->cpol);
 	}else{
 		gpio_set(bus->MOSI,tmp);
-		gpio_set(bus->SCK,(~bus->CPOL)&0x01);
-		gpio_set(bus->SCK,bus->CPOL);
+		gpio_set(bus->SCK,(~bus->cpol)&0x01);
+		gpio_set(bus->SCK,bus->cpol);
 	}
 }
 }
@@ -44,14 +44,14 @@ for(i=0;i<8;i++){
 unsigned char spi_read(SpiBus *bus){
 	unsigned char i,tmp,result=0x00;
 for(i=0;i<8;i++){
-	if(bus->CPHA){
-		gpio_set(bus->SCK,(~bus->CPOL)&0x01);
-		gpio_set(bus->SCK,bus->CPOL);
+	if(bus->cpha){
+		gpio_set(bus->SCK,(~bus->cpol)&0x01);
+		gpio_set(bus->SCK,bus->cpol);
 		tmp=gpio_get(bus->MISO);
 	}else{
-		gpio_set(bus->SCK,(~bus->CPOL)&0x01);
+		gpio_set(bus->SCK,(~bus->cpol)&0x01);
 		tmp=gpio_get(bus->MISO);
-		gpio_set(bus->SCK,bus->CPOL);
+		gpio_set(bus->SCK,bus->cpol);
 	}
 
 	if(bus->MSB_FIRST){

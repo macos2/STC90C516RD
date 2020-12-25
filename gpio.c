@@ -44,19 +44,55 @@ void gpio_set(gpio io,unsigned char value) {
 }
 
 unsigned char gpio_get(gpio io){
-	unsigned char tmp=0x00,pin=io&0x0f;
-	switch(io&0xf0){
-	GET_IO(0)
-		GET_IO(1)
-		GET_IO(2)
-		GET_IO(3)
-		GET_IO(4)
+//	unsigned char tmp=0x00,pin=io&0x0f;
+//	switch(io&0xf0){
+//	GET_IO(0)
+//		GET_IO(1)
+//		GET_IO(2)
+//		GET_IO(3)
+//		GET_IO(4)
+//	default:break;
+//	}
+//	return tmp;
+	unsigned char result=0,*p=&io;
+	switch (p[1]){
+	case 0x01:
+		result=P0&p[0];break;
+	case 0x02:
+		result=P1&p[0];break;
+	case 0x04:
+		result=P2&p[0];break;
+	case 0x08:
+		result=P3&p[0];break;
+	case 0x10:
+		result=P4&p[0];break;
 	default:break;
 	}
-	return tmp;
+	return result;
 }
 
 
+unsigned char gpio_get_pin(gpio io,gpio_pin pin){
+	unsigned char result=0,*p=&io;
+	switch (p[1]){
+	case 0x01:
+		result=P0&pin;break;
+	case 0x02:
+		result=P1&pin;break;
+	case 0x04:
+		result=P2&pin;break;
+	case 0x08:
+		result=P3&pin;break;
+	case 0x10:
+		result=P4&pin;break;
+	default:break;
+	}
+	result=result>0?1:0;
+	return result;
+}
+
 gpio gpio_format(unsigned char port,unsigned char pin){
-	return (port<<4)+(pin&0x0F);
+	gpio io=0x01<<(8+port);
+	io+=(0x01<<pin);
+	return io;
 }
