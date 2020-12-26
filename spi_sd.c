@@ -11,8 +11,21 @@ __xdata unsigned char __sd_cmd[6];
 
 unsigned char crc7_calc(unsigned int d){
 	unsigned char i=0;
-	unsigned int temp=d,p=0x4000,crc=sd_crc7_lsh7;
-	while(i<7){
+	unsigned int temp=d,p=0x8000,crc=sd_crc7_lsh8;
+	while(i<8){
+		if(p&temp){
+			temp=temp^crc;
+		}
+		crc=crc>>1;
+		p=p>>1;
+		i++;
+	}
+	return temp;
+}
+unsigned char crc7_calc_end(unsigned int d){
+	unsigned char i=0;
+	unsigned int temp=d,p=0x4000,crc=sd_crc7_lsh8>>1;
+	while(i<8){
 		if(p&temp){
 			temp=temp^crc;
 		}
@@ -35,5 +48,22 @@ unsigned int crc16_calc(unsigned long d){
 		p=p>>1;
 		i++;
 	}
+	return temp;
+}
+
+unsigned int crc16_calc_end(unsigned long d){
+	unsigned char i=0;
+	unsigned long temp=d,p=0x80000000,crc=sd_crc16_lsh15;
+	crc=crc<<15;
+	while(i<15){
+		if(p&temp){
+			temp=temp^crc;
+		}
+		crc=crc>>1;
+		p=p>>1;
+		i++;
+	}
+	temp=temp<<1;
+	if(temp&0x10000)temp=temp^crc;
 	return temp;
 }

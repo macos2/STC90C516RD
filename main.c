@@ -24,11 +24,7 @@ void spi_test();
 void usart_send(char *fmt,...){
 	 va_list list;
 	 va_start(list,fmt);
-	 usart_p+=vsprintf(usart_buf+usart_p,fmt,list);
-	 if((usart_p-usart_e)!=0){
-		 SBUF=usart_buf[usart_e];
-		 usart_e++;
-	 }
+	 usart_p+=vsprintf(usart_buf+usart_p+usart_e,fmt,list);
 	 va_end(list);
 }
 
@@ -47,7 +43,7 @@ void usart_interrupt() __interrupt 4{
 		t=SBUF;
 		SBUF=t;
 		//iic_test();
-		iic_eeprom();
+		//iic_eeprom();
 		//spi_test();
 		//long_t();
 		usart_send("received 0x%02x\r\n",t);
@@ -175,22 +171,44 @@ void spi_test(){
 	if(temp==0)usart_send("\r\nWrite Failed\r\n");
 }
 
+#define test_crc7(d,c) 	i=crc7_calc(0x##d);i=crc7_calc_end(i<<7);usart_send("crc7("#d")=%02x,0x"#c"\r\n",i)
 
 void main(){
 	unsigned int i;
-
+	unsigned long j;
 	gpio io=gpio_format(1,7);
 	usart_init();
 	//timer0_init();
 	iic_init();
 	spi_main_init();
 	//iic_test();
-	i=crc7_calc(0x9876);
-	usart_send("crc7_calc(0x5555)=%02x\r\n",i);
-	i=crc7_calc(i<<7);
-	usart_send("crc7_calc(i<<7)=%02x\r\n",i);
-	//usart_send("crc16_calc(0x5555)=%04x\r\n",crc16_calc(0x55550000));
+	 //0x9876=4B 0x1234=20 0x1111=22 0x4444=01 0x2222=44 0x3333=66 0x8888=02 0xFEDA=71 0xABCD=24 0xFF=79 F5=23
+//	i=crc7_calc(0x9876);
+//	i=crc7_calc_end(i<<7);
+//	usart_send("crc7(9876)=%02x,0x4B\r\n",i);
+//	i=crc7_calc(0xFEDA);
+//	i=crc7_calc_end(i<<7);
+//	usart_send("crc7(FEDA)=%02x,0x71\r\n",i);
+//	i=crc7_calc(0xABCD);
+//	i=crc7_calc_end(i<<7);
+//	usart_send("crc7(ABCD)=%02x,0x24\r\n",i);
+//
+//	test_crc7(1234,20);
+//	test_crc7(1111,22);
+//	test_crc7(3333,66);
+//	test_crc7(8888,02);
+//
+//	i=crc7_calc_end(0xF5<<7);
+//	usart_send("crc7(F5)=%02x,0x23\r\n",i);
+//	i=crc7_calc_end(0xFF<<7);
+//	usart_send("crc7(FF)=%02x,0x79\r\n",i);
+	j=crc16_calc(0xFFFF0000);
+	usart_send("crc16_calc(0xFFFFFFFF)=%04x\r\n",j);
+	j=crc16_calc_end(j<<15);
+	usart_send("crc16_calc_end(j<<15)=%04x\r\n",j);
 	while(1){
+		gpio_set(io,0);
+		gpio_set(io,1);
 //		i2c_start(&iic);
 //		i2c_send_7bit_addr(&iic,0x46,0);
 //		i2c_write(&iic,0x33);
