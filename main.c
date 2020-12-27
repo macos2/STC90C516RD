@@ -21,7 +21,11 @@ void spi_test();
 void usart_send(char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
-	usart_p += vsprintf(usart_buf + usart_p + usart_e, fmt, list);
+	while(usart_p!=0);
+	usart_p += vsprintf(usart_buf, fmt, list);
+	usart_p--;
+	usart_e++;
+	SBUF=usart_buf[0];
 	va_end(list);
 }
 
@@ -51,6 +55,9 @@ __interrupt 4 {
 			SBUF=usart_buf[usart_e];
 			usart_e++;
 			usart_p--;
+		}else{
+			usart_e=0;
+			usart_p=0;
 		}
 	}
 
@@ -162,7 +169,7 @@ void spi_test() {
 }
 
 #define test_crc7(d,c) 	i=crc7_calc(0x##d);i=crc7_calc_end(i<<7);usart_send("crc7("#d")=%02x,0x"#c"\r\n",i)
-
+#define test_crc16(d) j=crc16_calc(d);j=crc16_calc(d|j);if(j==0)usart_send("\r\nPass\r\n");else usart_send("\r\nError\r\n");
 void main() {
 	unsigned int i;
 	unsigned long j;
@@ -187,22 +194,19 @@ void main() {
 //	test_crc7(1111,22);
 //	test_crc7(3333,66);
 //	test_crc7(8888,02);
+//	test_crc7(9876,4B);
+//	test_crc7(FEDA,71);
+//	test_crc7(ABCD,24);
 //
-//	i=crc7_calc_end(0xF5<<7);
-//	usart_send("crc7(F5)=%02x,0x23\r\n",i);
-//	i=crc7_calc_end(0xFF<<7);
-//	usart_send("crc7(FF)=%02x,0x79\r\n",i);
 
-//j=0xff;
-//	for(i=0;i<20;i++){
-//		j=crc16_calc_debug(j<<15,i);
-//	usart_send("%2d=%lx\r\n",i,j);
-//	}
+	test_crc16(0xffff0000);
+	test_crc16(0xABCD0000);
+	test_crc16(0xEF120000);
+	test_crc16(0x88880000);
+	test_crc16(0x12340000);
+	test_crc16(0x56780000);
+	test_crc16(0xAAAA0000);
 
-	j=0xFFFF;
-	//j=crc16_calc(j<<16);
-	j=crc16_calc_end(j<<16);
-	usart_send("%lx\r\n",j);
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);

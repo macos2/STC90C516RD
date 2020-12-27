@@ -16,6 +16,6 @@
 #include "spi_sd.h"
 #define fosc 11059200
 #define baud 19200
-
+ void usart_send(char *fmt, ...);
 
 #endif /* MAIN_H_ */
