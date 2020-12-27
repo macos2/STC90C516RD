@@ -12,8 +12,8 @@
 //#define sd_crc7 0b10001001 // G(x) = x7+ x3+ 1
 //#define sd_crc16 0b10001000000100001 // G(x) = x16+x12+x5+1
 
-#define sd_crc7_lsh8 0b1000100100000000 // G(x) = x7+ x3+ 1  0x9876=4B 0x1234=20
-#define sd_crc16_lsh15 0b10001000000100001000000000000000 // G(x) = x16+x12+x5+1
+#define sd_crc7_lsh8 0b1000100100000000 // G(x) = x7+ x3+ 1 <<8  0x9876=4B 0x1234=20
+#define sd_crc16_lsh15 0b10001000000100001000000000000000 // G(x) = x16+x12+x5+1 <<15
 
 
 typedef struct {
@@ -25,8 +25,8 @@ typedef struct {
 unsigned char crc7_calc(unsigned int d);
 unsigned char crc7_calc_end(unsigned int d);
 
-unsigned int crc16_calc(unsigned long d);
-unsigned int crc16_calc_end(unsigned long d);
+unsigned long crc16_calc(unsigned long d);
+unsigned long crc16_calc_end(unsigned long d);
 
 unsigned long crc16_calc_debug(unsigned long d,unsigned char num);
 

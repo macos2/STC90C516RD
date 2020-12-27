@@ -188,10 +188,15 @@ void main() {
 //	usart_send("crc7(F5)=%02x,0x23\r\n",i);
 //	i=crc7_calc_end(0xFF<<7);
 //	usart_send("crc7(FF)=%02x,0x79\r\n",i);
+j=0xff;
 	for(i=0;i<20;i++){
-		j=crc16_calc_debug(0xFFFF0000,i);
-	usart_send("x%d=%lx\r\n",i,j);
+		j=crc16_calc_debug(j<<16,i);
+	usart_send("%2d=%lx\r\n",i,j);
 	}
+//	j=0xFFFF;
+//	//j=crc16_calc(j<<16);
+//	j=crc16_calc_end(j<<16);
+//	usart_send("%lx\r\n",j);
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
