@@ -60,6 +60,10 @@ void usart_init() {
 	SCON = 0x50;
 	TMOD |= 0x20;
 	PCON = 0x80;
+	AUXR &= 0xBF;//定时器1时钟为Fosc/12,即12T
+	AUXR &= 0xFE;//串口1选择定时器1为波特率发生器
+	//P3M0=0x02;
+	//P3M1=0x01;
 	TH1 = 253;
 	TL1 = 253;
 	TR1 = 1;
@@ -188,15 +192,17 @@ void main() {
 //	usart_send("crc7(F5)=%02x,0x23\r\n",i);
 //	i=crc7_calc_end(0xFF<<7);
 //	usart_send("crc7(FF)=%02x,0x79\r\n",i);
-j=0xff;
-	for(i=0;i<20;i++){
-		j=crc16_calc_debug(j<<16,i);
-	usart_send("%2d=%lx\r\n",i,j);
-	}
-//	j=0xFFFF;
-//	//j=crc16_calc(j<<16);
-//	j=crc16_calc_end(j<<16);
-//	usart_send("%lx\r\n",j);
+
+//j=0xff;
+//	for(i=0;i<20;i++){
+//		j=crc16_calc_debug(j<<15,i);
+//	usart_send("%2d=%lx\r\n",i,j);
+//	}
+
+	j=0xFFFF;
+	//j=crc16_calc(j<<16);
+	j=crc16_calc_end(j<<16);
+	usart_send("%lx\r\n",j);
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
