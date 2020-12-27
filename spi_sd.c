@@ -39,7 +39,6 @@ unsigned char crc7_calc_end(unsigned int d){
 unsigned int crc16_calc(unsigned long d){
 	unsigned char i=0;
 	unsigned long temp=d,p=0x80000000,crc=sd_crc16_lsh15;
-	crc=crc<<15;
 	while(i<15){
 		if(p&temp){
 			temp=temp^crc;
@@ -54,7 +53,6 @@ unsigned int crc16_calc(unsigned long d){
 unsigned int crc16_calc_end(unsigned long d){
 	unsigned char i=0;
 	unsigned long temp=d,p=0x80000000,crc=sd_crc16_lsh15;
-	crc=crc<<15;
 	while(i<15){
 		if(p&temp){
 			temp=temp^crc;
@@ -65,5 +63,24 @@ unsigned int crc16_calc_end(unsigned long d){
 	}
 	temp=temp<<1;
 	if(temp&0x10000)temp=temp^crc;
+	return temp;
+}
+
+unsigned long crc16_calc_debug(unsigned long d,unsigned char num){
+	unsigned char i=0;
+	unsigned long temp=d,p=0x80000000,crc=sd_crc16_lsh15;
+	while(i<num&&i<15){
+		if(p&temp){
+			temp=temp^crc;
+		}
+		crc=crc>>1;
+		p=p>>1;
+		i++;
+	}
+	while(i<num){
+		temp=temp<<1;
+		if(temp&0x10000)temp=temp^crc;
+		i++;
+	}
 	return temp;
 }

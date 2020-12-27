@@ -24,8 +24,12 @@ typedef struct {
 
 unsigned char crc7_calc(unsigned int d);
 unsigned char crc7_calc_end(unsigned int d);
+
 unsigned int crc16_calc(unsigned long d);
 unsigned int crc16_calc_end(unsigned long d);
+
+unsigned long crc16_calc_debug(unsigned long d,unsigned char num);
+
 unsigned char spi_sd_init();
 unsigned long spi_sd_write();
 unsigned long spi_sd_read();
