@@ -9,6 +9,7 @@
 __xdata unsigned char __sd_respon[17];
 __xdata unsigned char __sd_cmd[6];
 #define CLEAR_ARGS 	args[0]=0;args[1]=0;args[2]=0;args[3]=0;
+#define DUMMY_READ spi_read(sd->spi)
 
 unsigned char crc7_calc(unsigned int d){
 	unsigned char i=0;
@@ -101,16 +102,24 @@ spi_write(sd->spi,result[0]);
 unsigned char spi_sd_init(SpiSd *sd){
 	unsigned char r1,r3_r7[4];
 	unsigned char args[4];
-	spi_set_cs(sd->spi,0);
+
 
 	CLEAR_ARGS;
+	spi_set_cs(sd->spi,0);
+	spi_set_cs(sd->spi,1);
+	DUMMY_READ;
+	spi_set_cs(sd->spi,0);
 	spi_sd_send_command(sd,0,args);
+
 	r1=spi_read(sd->spi);
+	usart_send("R1:%02x\r\n",r1);
+
 	args[0]=0x55;
 	args[1]=0x01;
 	args[2]=0;
 	args[3]=0;
 	spi_sd_send_command(sd,8,args);
+	//DUMMY_READ;
 	r1=spi_read(sd->spi);
 	r3_r7[3]=spi_read(sd->spi);
 	r3_r7[2]=spi_read(sd->spi);
@@ -129,6 +138,7 @@ unsigned char spi_sd_init(SpiSd *sd){
 
 	CLEAR_ARGS;
 	spi_sd_send_command(sd,58,args);
+	//DUMMY_READ;
 	r1=spi_read(sd->spi);
 	r3_r7[3]=spi_read(sd->spi);
 	r3_r7[2]=spi_read(sd->spi);
