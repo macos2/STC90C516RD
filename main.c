@@ -171,6 +171,7 @@ void spi_test() {
 #define test_crc7(d,c) 	i=crc7_calc(0x##d);i=crc7_calc_end(i<<7);usart_send("crc7("#d")=%02x,0x"#c"\r\n",i)
 #define test_crc16(d) j=crc16_calc(d);j=crc16_calc(d|j);if(j==0)usart_send("\r\nPass\r\n");else usart_send("\r\nError\r\n");
 void main() {
+	unsigned char cmd[6],args[4];
 	unsigned int i;
 	unsigned long j;
 	gpio io = gpio_format(1, 7);
@@ -199,14 +200,16 @@ void main() {
 //	test_crc7(ABCD,24);
 //
 
-	test_crc16(0xffff0000);
-	test_crc16(0xABCD0000);
-	test_crc16(0xEF120000);
-	test_crc16(0x88880000);
-	test_crc16(0x12340000);
-	test_crc16(0x56780000);
-	test_crc16(0xAAAA0000);
-
+//	test_crc16(0xffff0000);
+//	test_crc16(0xABCD0000);
+//	test_crc16(0xEF120000);
+//	test_crc16(0x88880000);
+//	test_crc16(0x12340000);
+//	test_crc16(0x56780000);
+//	test_crc16(0xAAAA0000);
+	for(i=0;i<4;i++)args[i]=0;
+	 spi_sd_gen_command(0,args,cmd);
+	 for(i=0;i<6;i++)usart_send("%02x ",cmd[5-i]);
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
