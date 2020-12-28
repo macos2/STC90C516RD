@@ -207,9 +207,13 @@ void main() {
 //	test_crc16(0x12340000);
 //	test_crc16(0x56780000);
 //	test_crc16(0xAAAA0000);
-	for(i=0;i<4;i++)args[i]=0;
+	for(i=0;i<4;i++){args[i]=0;}
 	 spi_sd_gen_command(0,args,cmd);
-	 for(i=0;i<6;i++)usart_send("%02x ",cmd[5-i]);
+	 usart_send("GEN CMD: ");
+	 for(i=6;i!=0;i--){
+		 usart_send("%02x",cmd[i]);
+	 }
+	 //usart_send("%02x %02x %02x %02x %02x %02x",cmd[5],cmd[4],cmd[3],cmd[2],cmd[1],cmd[0]);
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
