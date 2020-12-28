@@ -13,6 +13,7 @@ __xdata I2cBus iic;
 __xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
 __xdata SpiMemory spi_mem;
+__xdata SpiSd spi_sd;
 
 void iic_test();
 void iic_eeprom();
@@ -141,11 +142,12 @@ void spi_main_init() {
 	spi.MOSI = gpio_format(1, 3);
 	spi.MSB_FIRST = 1;
 	spi.SCK = gpio_format(1, 2);
-	spi.CS = gpio_format(1, 5);
+	spi.CS = gpio_format(1, 6);
 	spi_init(&spi);
 	spi_mem.bus = &spi;
 	spi_mem.n_bit_address = SPI_MEMORY_8_BIT_ADDRESS;
 	spi_mem.page_size = 16;
+	spi_sd.spi=&spi;
 }
 
 void spi_test() {
@@ -207,13 +209,16 @@ void main() {
 //	test_crc16(0x12340000);
 //	test_crc16(0x56780000);
 //	test_crc16(0xAAAA0000);
-	for(i=0;i<4;i++){args[i]=0;}
-	 spi_sd_gen_command(0,args,cmd);
-	 usart_send("GEN CMD: ");
-	 for(i=6;i!=0;i--){
-		 usart_send("%02x",cmd[i]);
-	 }
+
+//	for(i=0;i<4;i++){args[i]=0;}
+//	 spi_sd_gen_command(0,args,cmd);
+//	 usart_send("GEN CMD: ");
+//	 for(i=6;i!=0;i--){
+//		 usart_send("%02x",cmd[i]);
+//	 }
+
 	 //usart_send("%02x %02x %02x %02x %02x %02x",cmd[5],cmd[4],cmd[3],cmd[2],cmd[1],cmd[0]);
+	 spi_sd_init(&spi_sd);
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
