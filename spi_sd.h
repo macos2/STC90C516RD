@@ -49,6 +49,7 @@ unsigned int crc16_calc(unsigned long d);
 
 void spi_sd_gen_command(unsigned char cmd,unsigned char *args,unsigned char *result);
 void spi_sd_send_command(SpiSd *sd,unsigned char cmd,unsigned char *args);
+unsigned char spi_sd_send_app_command(SpiSd *sd,unsigned char cmd,unsigned char *args);
 unsigned char spi_sd_init(SpiSd *sd);
 unsigned long spi_sd_write(SpiSd *sd);
 unsigned long spi_sd_read(SpiSd *sd);

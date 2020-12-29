@@ -9,8 +9,8 @@
 __xdata unsigned char __sd_respon[17];
 __xdata unsigned char __sd_cmd[6];
 unsigned char sd_timeout;
-#define CLEAR_ARGS 	args[0]=0;args[1]=0;args[2]=0;args[3]=0;
-#define READ_R1 sd_timeout=128;r1=0xff;while(r1==0xff&&sd_timeout){r1=spi_read(sd->spi);sd_timeout--;}
+#define CLEAR_ARGS(x) 	x[0]=0;x[1]=0;x[2]=0;x[3]=0;
+#define READ_R1 sd_timeout=10;r1=0xff;while(r1==0xff&&sd_timeout){r1=spi_read(sd->spi);sd_timeout--;}
 
 unsigned char crc7_calc(unsigned int d){
 	unsigned char i=0;
@@ -98,14 +98,24 @@ spi_write(sd->spi,result[2]);
 spi_write(sd->spi,result[1]);
 spi_write(sd->spi,result[0]);
 }
-
+unsigned char spi_sd_send_app_command(SpiSd *sd,unsigned char cmd,unsigned char *args){
+	unsigned char temp[4],r1;
+	CLEAR_ARGS(temp);
+	spi_sd_send_command(sd,55,temp);
+	READ_R1;
+	usart_send("Send CMD55 R1:%02x\r\n",r1);
+	spi_sd_send_command(sd,cmd,args);
+	READ_R1;
+	usart_send("Send ACMD%02d R1:%02x\r\n",cmd,r1);
+	return r1;
+}
 
 unsigned char spi_sd_init(SpiSd *sd){
 	unsigned char r1=0xff,r3_r7[4];
 	unsigned char args[4];
 
 
-	CLEAR_ARGS;
+	CLEAR_ARGS(args);
 	spi_set_cs(sd->spi,0);
 	spi_sd_send_command(sd,0,args);
 
@@ -133,7 +143,7 @@ unsigned char spi_sd_init(SpiSd *sd){
 		sd->version=1;
 	}
 
-	CLEAR_ARGS;
+	CLEAR_ARGS(args);
 	spi_sd_send_command(sd,58,args);
 	READ_R1;
 	r3_r7[3]=spi_read(sd->spi);
@@ -163,6 +173,42 @@ unsigned char spi_sd_init(SpiSd *sd){
 	 * 30 Card Capacity Status (CCS) This  bit  is  valid only when the card power up status bit is set.
 	 * 31 Card power up status bit (busy) This bit is set to LOW if the card has not finished the power up routine.
 	 */
+	args[0]=0;
+	args[1]=0;
+	args[2]=0;
+	args[3]=0x40;
+	r1=0xff;
+	sd_timeout=64;
+	while((r1&spi_sd_r1_idle_state==1)&&(sd_timeout>0)){
+		r1=spi_sd_send_app_command(sd,41,args);
+		sd_timeout--;
+	}
+	if(r1&spi_sd_r1_idle_state==1){
+		usart_send("Send ACMD41 with HCS=0 \r\n");
+		args[0]=0;
+		args[1]=0;
+		args[2]=0;
+		args[3]=0;
+		r1=0xff;
+		sd_timeout=64;
+		while((r1&spi_sd_r1_idle_state==1)&&(sd_timeout>0)){
+			r1=spi_sd_send_app_command(sd,41,args);
+			sd_timeout--;
+		}
+	}
+	CLEAR_ARGS(args);
+	READ_R1;
+	r3_r7[3]=spi_read(sd->spi);
+	r3_r7[2]=spi_read(sd->spi);
+	r3_r7[1]=spi_read(sd->spi);
+	r3_r7[0]=spi_read(sd->spi);
+	usart_send("R1:%02x\r\n",r1);
+	usart_send("R3:%02x %02x %02x %02x\r\n",r3_r7[3],r3_r7[2],r3_r7[1],r3_r7[0]);
+	if(r3_r7[3]&0x40==0x40)
+		usart_send("This is SDHC or SDXC card\r\n");
+	else
+		usart_send("This is SDSD card\r\n");
+
 	spi_set_cs(sd->spi,1);
 	return 0;
 }
