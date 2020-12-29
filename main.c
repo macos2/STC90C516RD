@@ -14,7 +14,7 @@ __xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
 __xdata SpiMemory spi_mem;
 __xdata SpiSd spi_sd;
-
+unsigned char test;
 void iic_test();
 void iic_eeprom();
 void spi_test();
@@ -50,6 +50,7 @@ __interrupt 4 {
 		//spi_test();
 		//long_t();
 		//usart_send("received 0x%02x\r\n",t);
+		test++;
 	} else {
 		TI=0;
 		if(usart_p>0) {
@@ -218,10 +219,14 @@ void main() {
 //	 }
 
 	 //usart_send("%02x %02x %02x %02x %02x %02x",cmd[5],cmd[4],cmd[3],cmd[2],cmd[1],cmd[0]);
-	 spi_sd_init(&spi_sd);
+
 	while (1) {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
+		while(test>0){
+			spi_sd_init(&spi_sd);
+			test--;
+		}
 //		i2c_start(&iic);
 //		i2c_send_7bit_addr(&iic,0x46,0);
 //		i2c_write(&iic,0x33);

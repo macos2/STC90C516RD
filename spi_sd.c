@@ -8,8 +8,9 @@
 
 __xdata unsigned char __sd_respon[17];
 __xdata unsigned char __sd_cmd[6];
+unsigned char sd_timeout;
 #define CLEAR_ARGS 	args[0]=0;args[1]=0;args[2]=0;args[3]=0;
-#define DUMMY_READ spi_read(sd->spi)
+#define READ_R1 sd_timeout=128;r1=0xff;while(r1==0xff&&sd_timeout){r1=spi_read(sd->spi);sd_timeout--;}
 
 unsigned char crc7_calc(unsigned int d){
 	unsigned char i=0;
@@ -100,18 +101,15 @@ spi_write(sd->spi,result[0]);
 
 
 unsigned char spi_sd_init(SpiSd *sd){
-	unsigned char r1,r3_r7[4];
+	unsigned char r1=0xff,r3_r7[4];
 	unsigned char args[4];
 
 
 	CLEAR_ARGS;
 	spi_set_cs(sd->spi,0);
-	spi_set_cs(sd->spi,1);
-	DUMMY_READ;
-	spi_set_cs(sd->spi,0);
 	spi_sd_send_command(sd,0,args);
 
-	r1=spi_read(sd->spi);
+	READ_R1;
 	usart_send("R1:%02x\r\n",r1);
 
 	args[0]=0x55;
@@ -119,33 +117,52 @@ unsigned char spi_sd_init(SpiSd *sd){
 	args[2]=0;
 	args[3]=0;
 	spi_sd_send_command(sd,8,args);
-	//DUMMY_READ;
-	r1=spi_read(sd->spi);
+	READ_R1;
 	r3_r7[3]=spi_read(sd->spi);
 	r3_r7[2]=spi_read(sd->spi);
 	r3_r7[1]=spi_read(sd->spi);
 	r3_r7[0]=spi_read(sd->spi);
 	usart_send("R1:%02x\r\n",r1);
 	usart_send("R7:%02x %02x %02x %02x\r\n",r3_r7[3],r3_r7[2],r3_r7[1],r3_r7[0]);
-
-
 	if((r1&spi_sd_r1_illegal_cmd)==0){
 		sd->version=2;
-		if(r3_r7[1]==r3_r7[0]&&r3_r7[0]==0x55)usart_send("SD SUPPORT VOLTAGE\r\n");
+		usart_send("SD VERSION 2.0\r\n");
+		if(r3_r7[1]==0x01&&r3_r7[0]==0x55)usart_send("SD SUPPORT VOLTAGE\r\n");
 	}else{
+		usart_send("SD VERSION 1.0\r\n");
 		sd->version=1;
 	}
 
 	CLEAR_ARGS;
 	spi_sd_send_command(sd,58,args);
-	//DUMMY_READ;
-	r1=spi_read(sd->spi);
+	READ_R1;
 	r3_r7[3]=spi_read(sd->spi);
 	r3_r7[2]=spi_read(sd->spi);
 	r3_r7[1]=spi_read(sd->spi);
 	r3_r7[0]=spi_read(sd->spi);
 	usart_send("R1:%02x\r\n",r1);
-	usart_send("R7:%02x %02x %02x %02x\r\n",r3_r7[3],r3_r7[2],r3_r7[1],r3_r7[0]);
+	usart_send("R3:%02x %02x %02x %02x\r\n",r3_r7[3],r3_r7[2],r3_r7[1],r3_r7[0]);
+	/* R3
+	 *  0~6 reserved
+	 *  7 Reserved for Low Voltage Range
+	 *  8~14 reserved
+	 * 15 2.7-2.8
+	 * 16 2.8-2.9
+	 * 17 2.9-3.0
+	 * 18 3.0-3.1
+	 * 19 3.1-3.2
+	 * 20 3.2-3.3
+	 * 21 3.3-3.4
+	 * 22 3.4-3.5
+	 * 23 3.5-3.6
+	 * 24 Switching to 1.8V Accepted (S18A) Only UHS-I card supports this bit.
+	 * 25-26 reserved
+	 * 27 Over 2TB support Status (CO2T) Only SDUCcard supports this bit.
+	 * 28 reserved
+	 * 29 UHS-II Card Status
+	 * 30 Card Capacity Status (CCS) This  bit  is  valid only when the card power up status bit is set.
+	 * 31 Card power up status bit (busy) This bit is set to LOW if the card has not finished the power up routine.
+	 */
 	spi_set_cs(sd->spi,1);
 	return 0;
 }
