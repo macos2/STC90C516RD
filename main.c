@@ -8,13 +8,14 @@
 #include "main.h"
 
 __xdata unsigned int timer0;
-__xdata unsigned char usart_buf[256], usart_p, usart_e, i2c_dev[10];
+__xdata unsigned char usart_buf[128], usart_p, usart_e, i2c_dev[10];
 __xdata I2cBus iic;
 __xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
-__xdata SpiMemory spi_mem;
+//__xdata SpiMemory spi_mem;
 __xdata SpiSd spi_sd;
-unsigned char test;
+__xdata unsigned char sd_buf[256];
+__xdata unsigned char test;
 void iic_test();
 void iic_eeprom();
 void spi_test();
@@ -111,7 +112,7 @@ void iic_test() {
 	for (i = 0; i < n; i++) {
 		usart_send("0x%02x ", i2c_dev[i]);
 	}
-	usart_send("\r\n");
+//	usart_send("\r\n");
 	//get 0x48 0x50 0x51 0x52 0x53 0x54 0x55 0x56 0x57
 }
 
@@ -145,19 +146,19 @@ void spi_main_init() {
 	spi.SCK = gpio_format(1, 2);
 	spi.CS = gpio_format(1, 6);
 	spi_init(&spi);
-	spi_mem.bus = &spi;
-	spi_mem.n_bit_address = SPI_MEMORY_8_BIT_ADDRESS;
-	spi_mem.page_size = 16;
+//	spi_mem.bus = &spi;
+//	spi_mem.n_bit_address = SPI_MEMORY_8_BIT_ADDRESS;
+//	spi_mem.page_size = 16;
 	spi_sd.spi=&spi;
 }
 
 void spi_test() {
 	unsigned char buf[25], i, temp;
 	spi_set_cs(&spi, 0);
-	spi_write(&spi, SPI_MEMORY_WRITE_ENABLE);
+	//spi_write(&spi, SPI_MEMORY_WRITE_ENABLE);
 	spi_set_cs(&spi, 1);
 	usart_send("SPI READ:%02x\r\n", spi_read(&spi));
-	spi_memory_read(&spi_mem, 0, buf, 25);
+	//spi_memory_read(&spi_mem, 0, buf, 25);
 	usart_send("\r\nspi memory test\r\n");
 	for (i = 0; i < 25; i++) {
 		usart_send("%02x ", buf[i]);
@@ -166,7 +167,7 @@ void spi_test() {
 	for (i = 0; i < 25; i++) {
 		buf[i] = i;
 	}
-	temp = spi_memory_write(&spi_mem, 16, buf, 25);
+	//temp = spi_memory_write(&spi_mem, 16, buf, 25);
 	if (temp == 0)
 		usart_send("\r\nWrite Failed\r\n");
 }
@@ -174,9 +175,9 @@ void spi_test() {
 #define test_crc7(d,c) 	i=crc7_calc(0x##d);i=crc7_calc_end(i<<7);usart_send("crc7("#d")=%02x,0x"#c"\r\n",i)
 #define test_crc16(d) j=crc16_calc(d);j=crc16_calc(d|j);if(j==0)usart_send("\r\nPass\r\n");else usart_send("\r\nError\r\n");
 void main() {
-	unsigned char cmd[6],args[4];
-	unsigned int i;
-	unsigned long j;
+
+//	unsigned int i;
+//	unsigned long j;
 	gpio io = gpio_format(1, 7);
 	usart_init();
 	//timer0_init();
@@ -211,6 +212,7 @@ void main() {
 //	test_crc16(0x56780000);
 //	test_crc16(0xAAAA0000);
 
+//	unsigned char cmd[6],args[4];
 //	for(i=0;i<4;i++){args[i]=0;}
 //	 spi_sd_gen_command(0,args,cmd);
 //	 usart_send("GEN CMD: ");
@@ -224,7 +226,8 @@ void main() {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
 		while(test>0){
-			spi_sd_init(&spi_sd);
+			spi_sd_init(&spi_sd,64,1);
+			spi_sd_read(&spi_sd,0,sd_buf,1);
 			test--;
 		}
 //		i2c_start(&iic);
