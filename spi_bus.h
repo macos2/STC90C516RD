@@ -15,9 +15,9 @@ typedef struct {
 	gpio SCK;
 	gpio MOSI;
 	gpio MISO;
-	unsigned char cpol;
-	unsigned char cpha;
-	unsigned char MSB_FIRST;
+	bool cpol;
+	bool cpha;
+	bool MSB_FIRST;
 } SpiBus;
 
 void spi_init(SpiBus *bus);

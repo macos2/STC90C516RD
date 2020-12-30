@@ -20,6 +20,8 @@ void iic_test();
 void iic_eeprom();
 void spi_test();
 
+
+
 void usart_send(char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
@@ -228,6 +230,7 @@ void main() {
 		while(test>0){
 			spi_sd_init(&spi_sd,64,1);
 			spi_sd_read(&spi_sd,0,sd_buf,1);
+			spi_sd_write(&spi_sd,0,sd_buf,1);
 			test--;
 		}
 //		i2c_start(&iic);

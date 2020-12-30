@@ -9,6 +9,7 @@
 #define GPIO_H_
 //#include "stc89xx_stc90xx.h"
 #include "stc8a_f.h"
+#include <stdbool.h>
 //#include <mcs51/at89x52.h>
 
 /* Format the gpio in a 8bit value like 0bFFFF PPPP

@@ -39,16 +39,17 @@ typedef struct {
 	SpiBus *spi;
 	unsigned int block_size;//16bit up to 64Kib
 	unsigned long cap;//32bit up to 4096Mib
-	unsigned version;
-	unsigned char is_SDSD;
+	bool is_Version2;
+	bool is_SDSD;
 }SpiSd;
 
 void spi_sd_gen_command(unsigned char cmd,unsigned char *args,unsigned char *result);
 unsigned char spi_sd_send_command(SpiSd *sd,unsigned char cmd,unsigned char *args);
 unsigned char spi_sd_send_app_command(SpiSd *sd,unsigned char cmd,unsigned char *args);
-unsigned char spi_sd_init(SpiSd *sd,unsigned int block_size_for_sdsd_mmc,unsigned char crc_off);
-unsigned long spi_sd_write(SpiSd *sd);
-unsigned long spi_sd_read(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned long num_block);
+unsigned char spi_sd_init(SpiSd *sd,unsigned int block_size_for_sdsd_mmc,bool crc_off);
 
+unsigned int spi_sd_read(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block);
+unsigned int spi_sd_write(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block);
 extern void usart_send(char *fmt, ...) ;
+
 #endif /* SPI_SD_H_ */
