@@ -34,7 +34,6 @@
 #define spi_sd_r2_earse_param 0x40
 #define spi_sd_r2_out_range_csd_overwrite 0x80
 
-
 typedef struct {
 	SpiBus *spi;
 	unsigned int block_size;//16bit up to 64Kib
@@ -43,13 +42,15 @@ typedef struct {
 	bool is_SDSD;
 }SpiSd;
 
-void spi_sd_gen_command(unsigned char cmd,unsigned char *args,unsigned char *result);
-unsigned char spi_sd_send_command(SpiSd *sd,unsigned char cmd,unsigned char *args);
-unsigned char spi_sd_send_app_command(SpiSd *sd,unsigned char cmd,unsigned char *args);
-unsigned char spi_sd_init(SpiSd *sd,unsigned int block_size_for_sdsd_mmc,bool crc_off);
+void spi_sd_gen_command(__xdata unsigned char cmd,__xdata unsigned char *args,__xdata unsigned char *result);
+__xdata unsigned char spi_sd_send_command(__xdata SpiSd *sd,__xdata unsigned char cmd,__xdata unsigned char *args);
+__xdata unsigned char spi_sd_send_app_command(__xdata SpiSd *sd,__xdata unsigned char cmd,__xdata unsigned char *args);
+__xdata unsigned char spi_sd_init(__xdata SpiSd *sd,__xdata unsigned int block_size_for_sdsd_mmc,__xdata bool crc_off);
 
-unsigned int spi_sd_read(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block);
-unsigned int spi_sd_write(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block);
+__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block);
+__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block);
+//unsigned int spi_sd_read();
+//unsigned int spi_sd_write();
 extern void usart_send(char *fmt, ...) ;
 
 #endif /* SPI_SD_H_ */

@@ -178,7 +178,7 @@ void spi_test() {
 #define test_crc16(d) j=crc16_calc(d);j=crc16_calc(d|j);if(j==0)usart_send("\r\nPass\r\n");else usart_send("\r\nError\r\n");
 void main() {
 
-//	unsigned int i;
+	unsigned int i;
 //	unsigned long j;
 	gpio io = gpio_format(1, 7);
 	usart_init();
@@ -229,8 +229,14 @@ void main() {
 		gpio_set(io, 1);
 		while(test>0){
 			spi_sd_init(&spi_sd,64,1);
-			spi_sd_read(&spi_sd,0,sd_buf,1);
+			spi_sd_read(&spi_sd,0,sd_buf,2);
+			for(i=0;i<128;i++){
+				sd_buf[i]=i;
+			}
 			spi_sd_write(&spi_sd,0,sd_buf,1);
+			spi_sd_write(&spi_sd,64,sd_buf+64,1);
+//			spi_sd_read();
+//			spi_sd_write();
 			test--;
 		}
 //		i2c_start(&iic);
