@@ -229,14 +229,18 @@ void main() {
 		gpio_set(io, 1);
 		while(test>0){
 			spi_sd_init(&spi_sd,64,1);
-			spi_sd_read(&spi_sd,0,sd_buf,2);
+//			spi_sd_read(&spi_sd,0,sd_buf,2);
 			for(i=0;i<128;i++){
 				sd_buf[i]=i;
 			}
-			spi_sd_write(&spi_sd,0,sd_buf,1);
-			spi_sd_write(&spi_sd,64,sd_buf+64,1);
-//			spi_sd_read();
-//			spi_sd_write();
+//			spi_sd_write(&spi_sd,0,sd_buf,1);
+//			spi_sd_write(&spi_sd,64,sd_buf+64,1);
+			spi_sd_set_rw_param(&spi_sd,0,sd_buf,2);
+			spi_sd_read();
+			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+			spi_sd_write();
+			spi_sd_set_rw_param(&spi_sd,64,sd_buf+64,1);
+			spi_sd_write();
 			test--;
 		}
 //		i2c_start(&iic);

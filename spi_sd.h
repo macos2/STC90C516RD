@@ -47,10 +47,11 @@ __xdata unsigned char spi_sd_send_command(__xdata SpiSd *sd,__xdata unsigned cha
 __xdata unsigned char spi_sd_send_app_command(__xdata SpiSd *sd,__xdata unsigned char cmd,__xdata unsigned char *args);
 __xdata unsigned char spi_sd_init(__xdata SpiSd *sd,__xdata unsigned int block_size_for_sdsd_mmc,__xdata bool crc_off);
 
-__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block);
-__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block);
-//unsigned int spi_sd_read();
-//unsigned int spi_sd_write();
+void spi_sd_set_rw_param(__xdata SpiSd *_sd,__xdata unsigned long _block_addr,__xdata unsigned char *_buf,__xdata unsigned int _num_block);
+//__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block);
+//__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block);
+unsigned int spi_sd_read();
+unsigned int spi_sd_write();
 extern void usart_send(char *fmt, ...) ;
 
 #endif /* SPI_SD_H_ */

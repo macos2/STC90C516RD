@@ -6,10 +6,10 @@
  */
 #include "spi_sd.h"
 
-//__xdata SpiSd *sd;
-//__xdata unsigned long block_addr;
-//__xdata unsigned char *buf;
-//__xdata unsigned int num_block;
+__xdata SpiSd *sd;
+__xdata unsigned long block_addr;
+__xdata unsigned char *buf;
+__xdata unsigned int num_block;
 
 #define CLEAR_ARGS(x) 	x[0]=0;x[1]=0;x[2]=0;x[3]=0;
 
@@ -272,9 +272,17 @@ unsigned char spi_sd_init(__xdata SpiSd *sd,__xdata unsigned int block_size_for_
 	return 0;
 }
 
+void spi_sd_set_rw_param(__xdata SpiSd *_sd,__xdata unsigned long _block_addr,__xdata unsigned char *_buf,__xdata unsigned int _num_block){
+	sd=_sd;
+	block_addr=_block_addr;
+	buf=_buf;
+	num_block=_num_block;
+}
+
+
 //unsigned int spi_sd_read(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block){
-//	unsigned int spi_sd_read(){
-__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block){
+	unsigned int spi_sd_read(){
+//__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block){
 	unsigned char r1,crc[2],*p,timeout=255;
 	unsigned int i,j,tmp_crc,tmp,read=0;
 	unsigned long tmp_crc_param;
@@ -343,8 +351,8 @@ __xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_a
 }
 
 //unsigned int spi_sd_write(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block){
-//unsigned int spi_sd_write(){
-__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block){
+unsigned int spi_sd_write(){
+//__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block){
 	unsigned char r1,timeout;
 	unsigned int i,j,writed=0;
 	spi_set_cs(sd->spi,0);
