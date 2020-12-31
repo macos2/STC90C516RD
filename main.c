@@ -142,11 +142,11 @@ void iic_eeprom() {
 void spi_main_init() {
 	spi.cpha = 0;
 	spi.cpol = 0;
-	spi.MISO = gpio_format(1, 4);
-	spi.MOSI = gpio_format(1, 3);
+	spi.MISO = gpio_format(1, 3);
+	spi.MOSI = gpio_format(1, 1);
 	spi.MSB_FIRST = 1;
 	spi.SCK = gpio_format(1, 2);
-	spi.CS = gpio_format(1, 6);
+	spi.CS = gpio_format(1, 0);
 	spi_init(&spi);
 //	spi_mem.bus = &spi;
 //	spi_mem.n_bit_address = SPI_MEMORY_8_BIT_ADDRESS;
@@ -230,18 +230,21 @@ void main() {
 		while(test>0){
 			spi_sd_init(&spi_sd,64,1);
 //			spi_sd_read(&spi_sd,0,sd_buf,2);
-			for(i=0;i<128;i++){
-				sd_buf[i]=i;
-			}
+//			for(i=0;i<128;i++){
+//				sd_buf[i]=i;
+//			}
 //			spi_sd_write(&spi_sd,0,sd_buf,1);
 //			spi_sd_write(&spi_sd,64,sd_buf+64,1);
-			spi_sd_set_rw_param(&spi_sd,0,sd_buf,2);
+			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
 			spi_sd_read();
+			usart_send("read buffer:\r\n");
+			for(i=0;i<256;i++){
+				usart_send("%02x ",sd_buf[i]);
+			}
+			usart_send("\r\n");
 			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
 			spi_sd_write();
-			spi_sd_set_rw_param(&spi_sd,64,sd_buf+64,1);
-			spi_sd_write();
-			test--;
+			test=0;
 		}
 //		i2c_start(&iic);
 //		i2c_send_7bit_addr(&iic,0x46,0);

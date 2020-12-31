@@ -307,6 +307,7 @@ void spi_sd_set_rw_param(__xdata SpiSd *_sd,__xdata unsigned long _block_addr,__
 		for(j=0;j<sd->block_size;j++){
 			*buf=spi_read(sd->spi);
 			buf++;
+			if(j>256)break;
 		}
 		crc[1]=spi_read(sd->spi);
 		crc[0]=spi_read(sd->spi);
@@ -361,6 +362,7 @@ unsigned int spi_sd_write(){
 	else
 		r1=spi_sd_send_command(sd,25,&block_addr);
 	if(r1!=0){
+		usart_send("Block Write Err:%02x\r\n",r1);
 		spi_set_cs(sd->spi,1);
 		return 0;
 	}
@@ -375,9 +377,11 @@ unsigned int spi_sd_write(){
 		for(j=0;j<sd->block_size;j++){
 			spi_write(sd->spi,*buf);
 			buf++;
+			if(j>256)break;
 		}
 		r1=spi_read(sd->spi);
-		if(r1!=0)usart_send("Block Write ERR:%02x\r\n",r1);
+		usart_send("Block Write Finish:%02x\r\n",r1);
+		if(r1!=0)usart_send("Block Write ERR\r\n");
 
 		//end of block writing
 		if(num_block!=1)spi_write(sd->spi,0xfd);
@@ -387,6 +391,7 @@ unsigned int spi_sd_write(){
 		do{
 			r1=spi_read(sd->spi);
 			timeout--;
+			usart_send("Waiting:%02x\r\n",r1);
 		}while(timeout&&(r1==0||r1==0xff));
 		if(r1==0||r1==0xff)usart_send("Block Write OverTime\r\n");
 		writed++;
