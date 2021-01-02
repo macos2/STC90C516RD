@@ -117,7 +117,7 @@ unsigned char spi_sd_send_command(__xdata SpiSd *sd,__xdata unsigned char cmd,
 }
 unsigned char spi_sd_send_app_command(__xdata SpiSd *sd, __xdata unsigned char cmd,
 		__xdata unsigned char *args) {
-	unsigned char temp[4], r1;
+	__xdata unsigned char temp[4], r1;
 	CLEAR_ARGS(temp);
 	r1 = spi_sd_send_command(sd, 55, temp);
 	usart_send("Send CMD55 R1:%02x\r\n", r1);
@@ -128,8 +128,8 @@ unsigned char spi_sd_send_app_command(__xdata SpiSd *sd, __xdata unsigned char c
 }
 
 unsigned char spi_sd_init(__xdata SpiSd *sd,__xdata unsigned int block_size_for_sdsd_mmc,__xdata bool crc_off) {
-	unsigned char r1 = 0xff, r3_r7[4], timeout;
-	unsigned char args[4];
+	__xdata unsigned char r1 = 0xff, r3_r7[4], timeout;
+	__xdata unsigned char args[4];
 
 	//Send CMD0 + CS=0 set card into idle state
 	CLEAR_ARGS(args);
@@ -284,7 +284,7 @@ void spi_sd_set_rw_param(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xd
 	unsigned int spi_sd_read(){
 //__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long __block_addr,__xdata unsigned char *buf,__xdata unsigned int __num_block){
 	unsigned char r1,crc[2],*p,timeout=255;
-	unsigned int i,j,tmp_crc,tmp,read=0;
+	__xdata unsigned int i,j,tmp_crc,tmp,read=0;
 	unsigned long tmp_crc_param;
 	spi_set_cs(__sd->spi, 0);
 	if(__num_block==1)

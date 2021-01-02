@@ -8,7 +8,7 @@
 #include "main.h"
 
 __xdata unsigned int timer0;
-__xdata unsigned char usart_buf[128], usart_p, usart_e, i2c_dev[10];
+__xdata unsigned char usart_buf[128], usart_p, usart_e, i2c_dev[10],timer0_isp;
 __xdata I2cBus iic;
 __xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
@@ -38,6 +38,7 @@ __interrupt 1 {
 	timer0++;
 	if(timer0==1000) {
 		timer0=0;
+		usart_send("%d\r\n",timer0_isp++);
 	}
 }
 
@@ -69,17 +70,27 @@ __interrupt 4 {
 }
 
 void usart_init() {
-	SCON = 0x50;
-	TMOD |= 0x20;
-	PCON = 0x80;
-	AUXR &= 0xBF;//定时器1时钟为Fosc/12,即12T
-	AUXR &= 0xFE;//串口1选择定时器1为波特率发生器
-	//P3M0=0x02;
-	//P3M1=0x01;
-	TH1 = 253;
-	TL1 = 253;
-	TR1 = 1;
-	ET1 = 0;
+	PCON |= 0x80;		//使能波特率倍速位SMOD
+	SCON = 0x50;		//8位数据,可变波特率
+	AUXR &= 0xBF;		//定时器1时钟为Fosc/12,即12T
+	AUXR &= 0xFE;		//串口1选择定时器1为波特率发生器
+	TMOD &= 0x0F;		//清除定时器1模式位
+	TMOD |= 0x20;		//设定定时器1为8位自动重装方式
+	TL1 = 0xFD;		//设定定时初值
+	TH1 = 0xFD;		//设定定时器重装值
+	ET1 = 0;		//禁止定时器1中断
+	TR1 = 1;		//启动定时器1
+//	SCON = 0x50;
+//	TMOD |= 0x20;
+//	PCON = 0x80;
+//	AUXR &= 0xBF;//定时器1时钟为Fosc/12,即12T
+//	AUXR &= 0xFE;//串口1选择定时器1为波特率发生器
+	P3M0=0x03;
+	P3M1=0x01;
+//	TH1 = 253;
+//	TL1 = 253;
+//	TR1 = 1;
+//	ET1 = 0;
 	ES = 1;
 	EA = 1;
 	usart_e = 0;
@@ -93,6 +104,7 @@ void timer0_init() {
 	ET0 = 1;
 	TR0 = 1;
 	timer0 = 0;
+	timer0_isp=0;
 }
 
 void iic_init() {
@@ -184,9 +196,10 @@ void main() {
 //	unsigned long j;
 	gpio io = gpio_format(1, 7);
 	usart_init();
-	//timer0_init();
+	timer0_init();
 	iic_init();
 	spi_main_init();
+	test=0;
 	//iic_test();
 	//0x9876=4B 0x1234=20 0x1111=22 0x4444=01 0x2222=44 0x3333=66 0x8888=02 0xFEDA=71 0xABCD=24 0xFF=79 F5=23
 //	i=crc7_calc(0x9876);
@@ -237,11 +250,11 @@ void main() {
 //			}
 //			spi_sd_write(&spi_sd,0,sd_buf,1);
 //			spi_sd_write(&spi_sd,64,sd_buf+64,1);
-			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+//			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
 			spi_sd_read();
 			usart_send("read buffer:\r\n");
 			for(i=0;i<spi_sd.block_size;i++){
-				usart_send("%02x ",sd_buf[i]);
+				usart_send("%2d:%02x\r\n",i,sd_buf[i]);
 			}
 			usart_send("\r\n");
 			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
