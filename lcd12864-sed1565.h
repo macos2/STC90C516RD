@@ -41,9 +41,11 @@ void sed1565_read_data(lcd12864_sed1565 *lcd, unsigned char col_addr,
 		unsigned char *result, unsigned char count);
 void sed1565_write_data(lcd12864_sed1565 *lcd, unsigned char iscode,
 		unsigned char *D, unsigned char count);
+
 void sed1565_set_coluumn(lcd12864_sed1565 *lcd, unsigned char col);
 void sed1565_set_line(lcd12864_sed1565 *lcd, unsigned char line);
 void sed1565_set_page(lcd12864_sed1565 *lcd, unsigned char page);
+
 void sed1565_write_16x16_Font(lcd12864_sed1565 *lcd, unsigned char page,
 		unsigned char col, unsigned char *f);
 void sed1565_write_8x16_Font(lcd12864_sed1565 *lcd, unsigned char page,

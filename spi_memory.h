@@ -29,7 +29,8 @@ typedef struct{
 	unsigned char n_bit_address;//example:SPI_MEMORY_8_BIT_ADDRESS
 }SpiMemory;
 
-void spi_memory_read(SpiMemory *mem,unsigned long addr,unsigned char *buf,unsigned int buf_len);
-unsigned int spi_memory_write(SpiMemory *mem,unsigned long addr,unsigned char *buf,unsigned int buf_len);
+void spi_memory_set_rw_param(__xdata SpiMemory *mem,__xdata unsigned long addr,__xdata unsigned char *buf,__xdata unsigned int buf_len);
+void spi_memory_read();
+__xdata unsigned int spi_memory_write();
 
 #endif /* SPI_MEMORY_H_ */

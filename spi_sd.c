@@ -6,10 +6,10 @@
  */
 #include "spi_sd.h"
 
-__xdata SpiSd *sd;
-__xdata unsigned long block_addr;
-__xdata unsigned char *buf;
-__xdata unsigned int num_block;
+__xdata SpiSd *__sd;
+__xdata unsigned long __block_addr;
+__xdata unsigned char *__sd_buf;
+__xdata unsigned int __num_block;
 
 #define CLEAR_ARGS(x) 	x[0]=0;x[1]=0;x[2]=0;x[3]=0;
 
@@ -272,45 +272,45 @@ unsigned char spi_sd_init(__xdata SpiSd *sd,__xdata unsigned int block_size_for_
 	return 0;
 }
 
-void spi_sd_set_rw_param(__xdata SpiSd *_sd,__xdata unsigned long _block_addr,__xdata unsigned char *_buf,__xdata unsigned int _num_block){
-	sd=_sd;
-	block_addr=_block_addr;
-	buf=_buf;
-	num_block=_num_block;
+void spi_sd_set_rw_param(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *sd_buf,__xdata unsigned int num_block){
+	__sd=sd;
+	__block_addr=block_addr;
+	__sd_buf=sd_buf;
+	__num_block=num_block;
 }
 
 
-//unsigned int spi_sd_read(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block){
+//unsigned int spi_sd_read(SpiSd *sd,unsigned long __block_addr,unsigned char *buf,unsigned int __num_block){
 	unsigned int spi_sd_read(){
-//__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block){
+//__xdata unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long __block_addr,__xdata unsigned char *buf,__xdata unsigned int __num_block){
 	unsigned char r1,crc[2],*p,timeout=255;
 	unsigned int i,j,tmp_crc,tmp,read=0;
 	unsigned long tmp_crc_param;
-	spi_set_cs(sd->spi, 0);
-	if(num_block==1)
-		r1=spi_sd_send_command(sd,17,&block_addr);//signal block read
+	spi_set_cs(__sd->spi, 0);
+	if(__num_block==1)
+		r1=spi_sd_send_command(__sd,17,&__block_addr);//signal block read
 	else
-		r1=spi_sd_send_command(sd,18,&block_addr);//mul-block read
+		r1=spi_sd_send_command(__sd,18,&__block_addr);//mul-block read
 	if(r1!=0){
-		spi_set_cs(sd->spi, 1);
+		spi_set_cs(__sd->spi, 1);
 		return 0;
 	}
 
-	for(i=0;i<num_block;i++){
-		p=buf;
+	for(i=0;i<__num_block;i++){
+		p=__sd_buf;
 
 		do{
-		r1=spi_read(sd->spi);
+		r1=spi_read(__sd->spi);
 		timeout--;
 		}	while(timeout!=0&&r1!=0xfe);
 
-		for(j=0;j<sd->block_size;j++){
-			*buf=spi_read(sd->spi);
-			buf++;
-			if(j>256)break;
+		for(j=0;j<__sd->block_size;j++){
+			*__sd_buf=spi_read(__sd->spi);
+			__sd_buf++;
+			//if(j>256)break;
 		}
-		crc[1]=spi_read(sd->spi);
-		crc[0]=spi_read(sd->spi);
+		crc[1]=spi_read(__sd->spi);
+		crc[0]=spi_read(__sd->spi);
 
 		//CRC Check
 		tmp_crc_param=p[0];
@@ -322,7 +322,7 @@ void spi_sd_set_rw_param(__xdata SpiSd *_sd,__xdata unsigned long _block_addr,__
 		tmp_crc_param|=p[3];
 		tmp_crc=crc16_calc(tmp_crc_param);
 		p+=4;
-		tmp=(sd->block_size-4)/2;
+		tmp=(__sd->block_size-4)/2;
 		for(j=0;j<tmp;j++){
 			tmp_crc_param=tmp_crc;
 			tmp_crc_param=tmp_crc_param<<8;
@@ -343,53 +343,53 @@ void spi_sd_set_rw_param(__xdata SpiSd *_sd,__xdata unsigned long _block_addr,__
 		read++;
 	}
 	i=0;//temp args for CMD12
-	if(num_block!=1){
-		r1=spi_sd_send_command(sd,12,&i);
+	if(__num_block!=1){
+		r1=spi_sd_send_command(__sd,12,&i);
 		if(r1!=0)usart_send("Stop Read Failed\r\n");
 	}
-	spi_set_cs(sd->spi, 1);
+	spi_set_cs(__sd->spi, 1);
 	return read;
 }
 
-//unsigned int spi_sd_write(SpiSd *sd,unsigned long block_addr,unsigned char *buf,unsigned int num_block){
+//unsigned int spi_sd_write(SpiSd *sd,unsigned long __block_addr,unsigned char *buf,unsigned int __num_block){
 unsigned int spi_sd_write(){
-//__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xdata unsigned char *buf,__xdata unsigned int num_block){
+//__xdata unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long __block_addr,__xdata unsigned char *buf,__xdata unsigned int __num_block){
 	unsigned char r1,timeout;
 	unsigned int i,j,writed=0;
-	spi_set_cs(sd->spi,0);
-	if(num_block==1)
-		r1=spi_sd_send_command(sd,24,&block_addr);
+	spi_set_cs(__sd->spi,0);
+	if(__num_block==1)
+		r1=spi_sd_send_command(__sd,24,&__block_addr);
 	else
-		r1=spi_sd_send_command(sd,25,&block_addr);
+		r1=spi_sd_send_command(__sd,25,&__block_addr);
 	if(r1!=0){
 		usart_send("Block Write Err:%02x\r\n",r1);
-		spi_set_cs(sd->spi,1);
+		spi_set_cs(__sd->spi,1);
 		return 0;
 	}
 
-	for(i=0;i<num_block;i++){
+	for(i=0;i<__num_block;i++){
 		//start of block writing
-		if(num_block==1&&i==0)
-			spi_write(sd->spi,0xfe);
+		if(__num_block==1&&i==0)
+			spi_write(__sd->spi,0xfe);
 		else
-			spi_write(sd->spi,0xfc);
+			spi_write(__sd->spi,0xfc);
 
-		for(j=0;j<sd->block_size;j++){
-			spi_write(sd->spi,*buf);
-			buf++;
-			if(j>256)break;
+		for(j=0;j<__sd->block_size;j++){
+			spi_write(__sd->spi,*__sd_buf);
+			__sd_buf++;
+			//if(j>256)break;
 		}
-		r1=spi_read(sd->spi);
+		r1=spi_read(__sd->spi);
 		usart_send("Block Write Finish:%02x\r\n",r1);
 		if(r1!=0)usart_send("Block Write ERR\r\n");
 
 		//end of block writing
-		if(num_block!=1)spi_write(sd->spi,0xfd);
+		if(__num_block!=1)spi_write(__sd->spi,0xfd);
 
 		//wait for writing finish
 		timeout=255;
 		do{
-			r1=spi_read(sd->spi);
+			r1=spi_read(__sd->spi);
 			timeout--;
 			usart_send("Waiting:%02x\r\n",r1);
 		}while(timeout&&(r1==0||r1==0xff));
@@ -397,6 +397,6 @@ unsigned int spi_sd_write(){
 		writed++;
 
 	}
-	spi_set_cs(sd->spi,1);
+	spi_set_cs(__sd->spi,1);
 	return writed;
 }

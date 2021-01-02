@@ -123,13 +123,15 @@ void iic_eeprom() {
 	for (i = 0; i < 25; i++) {
 		buf[i] = i;
 	}
-	i = i2c_memory_write(&i2c_mem, 0x08, 25, buf);
+	i2c_memory_set_rw_param(&i2c_mem, 0x08, 25, buf);
+	i = i2c_memory_write();
 	if (i != 25)
 		usart_send("write i2c memory fail\r\n");
 	for (i = 0; i < 25; i++) {
 		buf[i] = 0;
 	}
-	i = i2c_memory_read(&i2c_mem, 0x08, 25, buf);
+	i2c_memory_set_rw_param(&i2c_mem, 0x08, 25, buf);
+	i = i2c_memory_read();
 	if (i != 25)
 		usart_send("read i2c memory fail\r\n");
 	usart_send("\r\nbuf:\r\n");
@@ -238,7 +240,7 @@ void main() {
 			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
 			spi_sd_read();
 			usart_send("read buffer:\r\n");
-			for(i=0;i<256;i++){
+			for(i=0;i<spi_sd.block_size;i++){
 				usart_send("%02x ",sd_buf[i]);
 			}
 			usart_send("\r\n");

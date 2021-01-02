@@ -8,62 +8,73 @@
 #include "spi_memory.h"
 #define WRITE_OVERTIME 10
 
-void spi_memory_read(SpiMemory *mem, unsigned long addr, unsigned char *buf,
-		unsigned int buf_len) {
-	unsigned int i, *p = &addr;
-	spi_set_cs(mem->bus, 0);
-	spi_write(mem->bus, SPI_MEMORY_READ);
+__xdata SpiMemory *__spi_mem;
+__xdata unsigned long __spi_mem_addr;
+__xdata unsigned char *__spi_mem_buf;
+__xdata	unsigned int __spi_mem_buf_len;
 
-	for (i = 0; i <= mem->n_bit_address; i++) {
-		if (mem->bus->MSB_FIRST)
-			spi_write(mem->bus, p[mem->n_bit_address - i]);
-		else
-			spi_write(mem->bus, p[i]);
-	}
-
-	for (i = 0; i < buf_len; i++) {
-		buf[i] = spi_read(mem->bus);
-	}
-
-	spi_set_cs(mem->bus, 1);
+void spi_memory_set_rw_param(__xdata SpiMemory *mem,__xdata unsigned long addr,__xdata unsigned char *buf,__xdata unsigned int buf_len){
+	__spi_mem=mem;
+	__spi_mem_addr=addr;
+	__spi_mem_buf=buf;
+	__spi_mem_buf_len=buf_len;
 }
 
-unsigned int spi_memory_write(SpiMemory *mem, unsigned long addr, unsigned char *buf,
-		unsigned int buf_len) {
-	unsigned char i,j=0, *p = &addr;
-	spi_set_cs(mem->bus, 0);
+void spi_memory_read(){
+	unsigned int i, *p = &__spi_mem_addr;
+	spi_set_cs(__spi_mem->bus, 0);
+	spi_write(__spi_mem->bus, SPI_MEMORY_READ);
+
+	for (i = 0; i <= __spi_mem->n_bit_address; i++) {
+		if (__spi_mem->bus->MSB_FIRST)
+			spi_write(__spi_mem->bus, p[__spi_mem->n_bit_address - i]);
+		else
+			spi_write(__spi_mem->bus, p[i]);
+	}
+
+	for (i = 0; i < __spi_mem_buf_len; i++) {
+		__spi_mem_buf[i] = spi_read(__spi_mem->bus);
+	}
+
+	spi_set_cs(__spi_mem->bus, 1);
+}
+
+unsigned int spi_memory_write() {
+	unsigned char i,j=0, *p = &__spi_mem_addr;
+	spi_set_cs(__spi_mem->bus, 0);
 
 	do{
-		spi_write(mem->bus,SPI_MEMORY_READ_STATUS);
-		i=spi_read(mem->bus);
+		spi_write(__spi_mem->bus,SPI_MEMORY_READ_STATUS);
+		i=spi_read(__spi_mem->bus);
 		j++;
 	}while((i&0x01)&&(j<=WRITE_OVERTIME));
 
 	if(j==WRITE_OVERTIME)return 0;
 
-	spi_set_cs(mem->bus, 1);
-	spi_set_cs(mem->bus, 0);
-	spi_write(mem->bus, SPI_MEMORY_WRITE_ENABLE);
-	spi_set_cs(mem->bus, 1);
-	spi_set_cs(mem->bus, 0);
-	spi_write(mem->bus, SPI_MEMORY_WRITE);
+	spi_set_cs(__spi_mem->bus, 1);
+	spi_set_cs(__spi_mem->bus, 0);
+	spi_write(__spi_mem->bus, SPI_MEMORY_WRITE_ENABLE);
+	spi_set_cs(__spi_mem->bus, 1);
+	spi_set_cs(__spi_mem->bus, 0);
+	spi_write(__spi_mem->bus, SPI_MEMORY_WRITE);
 
-	for (i = 0; i <= mem->n_bit_address; i++) {
-		if (mem->bus->MSB_FIRST)
-			spi_write(mem->bus, p[mem->n_bit_address - i]);
+	for (i = 0; i <= __spi_mem->n_bit_address; i++) {
+		if (__spi_mem->bus->MSB_FIRST)
+			spi_write(__spi_mem->bus, p[__spi_mem->n_bit_address - i]);
 		else
-			spi_write(mem->bus, p[i]);
+			spi_write(__spi_mem->bus, p[i]);
 	}
 
-	j=buf_len>mem->page_size?mem->page_size:buf_len;
+	j=__spi_mem_buf_len>__spi_mem->page_size?__spi_mem->page_size:__spi_mem_buf_len;
 	for (i = 0; i < j; i++) {
-		spi_write(mem->bus, buf[i]);
+		spi_write(__spi_mem->bus, __spi_mem_buf[i]);
 	}
 
-	spi_set_cs(mem->bus, 1);
+	spi_set_cs(__spi_mem->bus, 1);
 
-	if(buf_len>mem->page_size){
-		spi_memory_write(mem,addr+mem->page_size,buf+mem->page_size,buf_len-mem->page_size);
+	if(__spi_mem_buf_len>__spi_mem->page_size){
+		spi_memory_set_rw_param(__spi_mem,__spi_mem_addr+__spi_mem->page_size,__spi_mem_buf+__spi_mem->page_size,__spi_mem_buf_len-__spi_mem->page_size);
+		spi_memory_write();
 	}
-	return buf_len;
+	return __spi_mem_buf_len;
 }
