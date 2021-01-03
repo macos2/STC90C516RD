@@ -102,7 +102,7 @@ void timer0_init() {
 	TL0 = 6;
 	TH0 = 6;
 	ET0 = 1;
-	TR0 = 1;
+	TR0 = 0;
 	timer0 = 0;
 	timer0_isp=0;
 }
@@ -184,15 +184,15 @@ void spi_test() {
 		buf[i] = i;
 	}
 	//temp = spi_memory_write(&spi_mem, 16, buf, 25);
-	if (temp == 0)
-		usart_send("\r\nWrite Failed\r\n");
+//	if (temp == 0)
+//		usart_send("\r\nWrite Failed\r\n");
 }
 
 #define test_crc7(d,c) 	i=crc7_calc(0x##d);i=crc7_calc_end(i<<7);usart_send("crc7("#d")=%02x,0x"#c"\r\n",i)
 #define test_crc16(d) j=crc16_calc(d);j=crc16_calc(d|j);if(j==0)usart_send("\r\nPass\r\n");else usart_send("\r\nError\r\n");
 void main() {
 
-	unsigned int i;
+	unsigned int i,j;
 //	unsigned long j;
 	gpio io = gpio_format(1, 7);
 	usart_init();
@@ -243,7 +243,7 @@ void main() {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
 		while(test>0){
-			spi_sd_init(&spi_sd,64,1);
+			//spi_sd_init(&spi_sd,64,1);
 //			spi_sd_read(&spi_sd,0,sd_buf,2);
 //			for(i=0;i<128;i++){
 //				sd_buf[i]=i;
@@ -251,15 +251,23 @@ void main() {
 //			spi_sd_write(&spi_sd,0,sd_buf,1);
 //			spi_sd_write(&spi_sd,64,sd_buf+64,1);
 //			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
-			spi_sd_read();
-			usart_send("read buffer:\r\n");
-			for(i=0;i<spi_sd.block_size;i++){
-				usart_send("%2d:%02x\r\n",i,sd_buf[i]);
-			}
-			usart_send("\r\n");
-			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
-			spi_sd_write();
+//			spi_sd_read();
+//			usart_send("read buffer:\r\n");
+//			for(i=0;i<spi_sd.block_size;i++){
+//				usart_send("%02x ",sd_buf[i]);
+//			}
+//			usart_send("\r\n");
+//			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+//			spi_sd_write();
 			test=0;
+			i=one_wire_bus_search_rom(0,sd_buf,5);
+			usart_send("%d device detected\r\n",i);
+			j=0;
+			while(i>0){
+				usart_send("%d %02x %02x %02x %02x %02x %02x %02x",sd_buf[j],sd_buf[j+1],sd_buf[j+2],sd_buf[j+3],sd_buf[j+4],sd_buf[j+5]);
+				j+=6;
+				i--;
+			}
 		}
 //		i2c_start(&iic);
 //		i2c_send_7bit_addr(&iic,0x46,0);
