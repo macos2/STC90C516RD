@@ -14,7 +14,7 @@ __xdata I2cMemory i2c_mem;
 __xdata SpiBus spi;
 //__xdata SpiMemory spi_mem;
 __xdata SpiSd spi_sd;
-__xdata unsigned char sd_buf[256];
+__xdata unsigned char sd_buf[512];
 __xdata unsigned char test;
 void iic_test();
 void iic_eeprom();
@@ -243,22 +243,22 @@ void main() {
 		gpio_set(io, 0);
 		gpio_set(io, 1);
 		while(test>0){
-			//spi_sd_init(&spi_sd,64,1);
+			spi_sd_init(&spi_sd,64,1);
 //			spi_sd_read(&spi_sd,0,sd_buf,2);
 //			for(i=0;i<128;i++){
 //				sd_buf[i]=i;
 //			}
 //			spi_sd_write(&spi_sd,0,sd_buf,1);
 //			spi_sd_write(&spi_sd,64,sd_buf+64,1);
-//			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
-//			spi_sd_read();
-//			usart_send("read buffer:\r\n");
-//			for(i=0;i<spi_sd.block_size;i++){
-//				usart_send("%02x ",sd_buf[i]);
-//			}
-//			usart_send("\r\n");
-//			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
-//			spi_sd_write();
+			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+			spi_sd_read();
+			usart_send("read buffer:\r\n");
+			for(i=0;i<spi_sd.block_size;i++){
+				usart_send("%02x ",sd_buf[i]);
+			}
+			usart_send("\r\n");
+			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+			spi_sd_write();
 			test=0;
 			i=one_wire_bus_search_rom(0,sd_buf,5);
 			usart_send("%d device detected\r\n",i);

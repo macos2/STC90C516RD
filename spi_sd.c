@@ -307,7 +307,7 @@ void spi_sd_set_rw_param(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xd
 		for(j=0;j<__sd->block_size;j++){
 			*__sd_buf=spi_read(__sd->spi);
 			__sd_buf++;
-			if(j>256)break;
+			//if(j>256)break;
 		}
 		crc[1]=spi_read(__sd->spi);
 		crc[0]=spi_read(__sd->spi);
@@ -377,7 +377,7 @@ unsigned int spi_sd_write(){
 		for(j=0;j<__sd->block_size;j++){
 			spi_write(__sd->spi,*__sd_buf);
 			__sd_buf++;
-			if(j>256)break;
+			//if(j>256)break;
 		}
 		r1=spi_read(__sd->spi);
 		usart_send("Block Write Finish:%02x\r\n",r1);
