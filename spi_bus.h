@@ -20,10 +20,10 @@ typedef struct {
 	bool MSB_FIRST;
 } SpiBus;
 
-void spi_init(SpiBus *bus);
-void spi_set_cs(SpiBus *bus,unsigned char cs);
+void spi_init( __xdata SpiBus *bus);
+void spi_set_cs(__xdata SpiBus *bus,unsigned char cs);
 
-void spi_write(SpiBus *bus,unsigned char data);
-unsigned char spi_read(SpiBus *bus);
+void spi_write(__xdata SpiBus *bus,unsigned char data);
+unsigned char spi_read(__xdata SpiBus *bus);
 
 #endif /* SPI_BUS_H_ */

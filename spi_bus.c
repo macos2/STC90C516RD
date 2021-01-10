@@ -7,19 +7,24 @@
 
 #include "spi_bus.h"
 
-void spi_init(SpiBus *bus) {
-	gpio_set(bus->CS, 1);
-	gpio_set(bus->SCK, bus->cpol);
+__xdata SpiBus *__spi_bus;
+
+void spi_init(__xdata SpiBus *bus) {
+	__spi_bus=bus;
+	gpio_set(__spi_bus->CS, 1);
+	gpio_set(__spi_bus->SCK, __spi_bus->cpol);
 }
 
-void spi_set_cs(SpiBus *bus, unsigned char cs) {
-	gpio_set(bus->CS, cs);
+void spi_set_cs(__xdata SpiBus *bus, unsigned char cs) {
+	__spi_bus=bus;
+	gpio_set(__spi_bus->CS, cs);
 }
 
-void spi_write(SpiBus *bus, unsigned char data) {
+void spi_write(__xdata SpiBus *bus, unsigned char data) {
+	__spi_bus=bus;
 	unsigned char i, tmp;
 	for (i = 0; i < 8; i++) {
-		if (bus->MSB_FIRST) {
+		if (__spi_bus->MSB_FIRST) {
 			tmp = (data & 0x80) ? 0x01 : 0x00;
 			data = data << 1;
 		} else {
@@ -27,32 +32,33 @@ void spi_write(SpiBus *bus, unsigned char data) {
 			data = data >> 1;
 		}
 
-		if (bus->cpha) {
-			gpio_set(bus->SCK, (~bus->cpol) & 0x01);
-			gpio_set(bus->MOSI, tmp);
-			gpio_set(bus->SCK, bus->cpol);
+		if (__spi_bus->cpha) {
+			gpio_set(__spi_bus->SCK, (~__spi_bus->cpol) & 0x01);
+			gpio_set(__spi_bus->MOSI, tmp);
+			gpio_set(__spi_bus->SCK, __spi_bus->cpol);
 		} else {
-			gpio_set(bus->MOSI, tmp);
-			gpio_set(bus->SCK, (~bus->cpol) & 0x01);
-			gpio_set(bus->SCK, bus->cpol);
+			gpio_set(__spi_bus->MOSI, tmp);
+			gpio_set(__spi_bus->SCK, (~__spi_bus->cpol) & 0x01);
+			gpio_set(__spi_bus->SCK, __spi_bus->cpol);
 		}
 	}
 }
 
-unsigned char spi_read(SpiBus *bus) {
+unsigned char spi_read(__xdata SpiBus *bus) {
+	__spi_bus=bus;
 	unsigned char i, tmp, result = 0x00;
 	for (i = 0; i < 8; i++) {
-		if (bus->cpha) {
-			gpio_set(bus->SCK, (~bus->cpol) & 0x01);
-			gpio_set(bus->SCK, bus->cpol);
-			tmp = gpio_get(bus->MISO);
+		if (__spi_bus->cpha) {
+			gpio_set(__spi_bus->SCK, (~__spi_bus->cpol) & 0x01);
+			gpio_set(__spi_bus->SCK, __spi_bus->cpol);
+			tmp = gpio_get(__spi_bus->MISO);
 		} else {
-			gpio_set(bus->SCK, (~bus->cpol) & 0x01);
-			tmp = gpio_get(bus->MISO);
-			gpio_set(bus->SCK, bus->cpol);
+			gpio_set(__spi_bus->SCK, (~__spi_bus->cpol) & 0x01);
+			tmp = gpio_get(__spi_bus->MISO);
+			gpio_set(__spi_bus->SCK, __spi_bus->cpol);
 		}
 
-		if (bus->MSB_FIRST) {
+		if (__spi_bus->MSB_FIRST) {
 			result |= tmp << (7 - i);
 		} else {
 			result |= tmp << i;

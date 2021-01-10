@@ -253,11 +253,11 @@ void main() {
 //			}
 //			spi_sd_write(&spi_sd,0,sd_buf,1);
 //			spi_sd_write(&spi_sd,64,sd_buf+64,1);
-			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
-			spi_sd_read();
+			//spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+			spi_sd_read(&spi_sd,0,sd_buf,1);
 			usart_send("\r\n");
-			spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
-			spi_sd_write();
+			//spi_sd_set_rw_param(&spi_sd,0,sd_buf,1);
+			spi_sd_write(&spi_sd,0,sd_buf,1);
 			test=0;
 
 		}

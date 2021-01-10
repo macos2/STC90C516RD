@@ -14,18 +14,12 @@ __xdata unsigned long __addr;
 __xdata unsigned char __buf_size;
 __xdata unsigned char *__i2c_mem_buf;
 
-void i2c_memory_set_rw_param(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned char buf_size,__xdata unsigned char *i2c_mem_buf){
+unsigned char i2c_memory_read(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned char buf_size,__xdata unsigned char *i2c_mem_buf){
 	__i2c__mem=mem;
 	__addr=addr;
 	__buf_size=buf_size;
 	__i2c_mem_buf=i2c_mem_buf;
-}
-
-//unsigned char i2c_memory_read(I2cMemory *mem,unsigned long addr,unsigned char buf_size,unsigned char *buf){
-unsigned char i2c_memory_read(){
 	__xdata unsigned char i,j=0,ack,*p;
-
-
 	do{
 		i2c_stop(__i2c__mem->bus);
 		i2c_start(__i2c__mem->bus);
@@ -59,8 +53,11 @@ unsigned char i2c_memory_read(){
 	return __buf_size;
 }
 
-//unsigned char i2c_memory_write(I2cMemory *mem,unsigned long addr,unsigned char buf_size,unsigned char *buf){
-unsigned char i2c_memory_write(){
+unsigned char i2c_memory_write(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned char buf_size,__xdata unsigned char *i2c_mem_buf){
+	__i2c__mem=mem;
+	__addr=addr;
+	__buf_size=buf_size;
+	__i2c_mem_buf=i2c_mem_buf;
 	__xdata unsigned char i,j=0,ack,*p;
 
 	do{
@@ -89,8 +86,7 @@ unsigned char i2c_memory_write(){
 	if(__buf_size>__i2c__mem->page_size){//next page write
 				i2c_stop(__i2c__mem->bus);
 				//write next page
-				i2c_memory_set_rw_param(__i2c__mem,__addr+__i2c__mem->page_size,__buf_size-__i2c__mem->page_size,__i2c_mem_buf);
-				j=i2c_memory_write();
+				j=i2c_memory_write(__i2c__mem,__addr+__i2c__mem->page_size,__buf_size-__i2c__mem->page_size,__i2c_mem_buf);
 				if(j==0){
 					i2c_stop(__i2c__mem->bus);
 					return 0;
