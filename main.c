@@ -11,6 +11,8 @@ __xdata unsigned int timer0;
 __xdata unsigned char usart_buf[128], usart_p, usart_e, i2c_dev[10],timer0_isp;
 __xdata SpiBus spi;
 __xdata SpiSd spi_sd;
+__xdata I2cBus i2c;
+__xdata I2cMemory i2c_mem;
 __xdata unsigned char sd_buf[512];
 __xdata unsigned char test;
 void iic_test();
@@ -50,6 +52,7 @@ __interrupt 4 {
 		if(t=='2')test=2;
 		if(t=='3')test=3;
 		if(t=='4')test=4;
+		if(t=='5')test=5;
 	} else {
 		TI=0;
 		if(usart_p>0) {
@@ -105,13 +108,24 @@ void spi_main_init() {
 	spi_sd.spi=&spi;
 }
 
+void i2c_init(){
+	i2c.sck=gpio_format(1,0);
+	i2c.sda=gpio_format(1,1);
+	i2c_mem.bus=&i2c;
+	i2c_mem.dev_addr=0x51;
+	i2c_mem.n_bit_addr=I2C_MEMORY_8_BIT_ADDRESS;
+	i2c_mem.page_size=8;
+
+}
+
 void main() {
-	unsigned char i;
+	unsigned int i;
 	unsigned int j;
 	gpio io = gpio_format(1, 7);
 	usart_init();
 	timer0_init();
 	spi_main_init();
+	i2c_init();
 	test=0;
 	while (1) {
 		gpio_set(io, 0);
@@ -151,6 +165,18 @@ void main() {
 			for(i=0;i<255;i++){
 				usart_send("%02x ",sd_buf[i]);
 			}
+			test=0;
+		}
+		if(test==5){
+			i2c_memory_read(&i2c_mem,0x00,256,sd_buf);
+			for(i=0;i<256;i++){
+				if(i%8==0)usart_send("\r\n");
+				usart_send("%02x ",sd_buf[i]);
+			}
+			for(i=0;i<256;i++){
+				sd_buf[i]=i;
+			}
+			i2c_memory_write(&i2c_mem,0x00,256,sd_buf);
 			test=0;
 		}
 	};

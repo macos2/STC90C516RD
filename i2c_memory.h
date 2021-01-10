@@ -22,8 +22,8 @@ typedef struct{
 	unsigned char n_bit_addr;//example: I2C_MEMORY_8_BIT_ADDRESS
 }I2cMemory;
 
-unsigned char i2c_memory_read(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned char buf_size,__xdata unsigned char *i2c_mem_buf);
-unsigned char i2c_memory_write(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned char buf_size,__xdata unsigned char *i2c_mem_buf);
+unsigned char i2c_memory_read(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned int buf_size,__xdata unsigned char *i2c_mem_buf);
+unsigned char i2c_memory_write(__xdata I2cMemory *mem,__xdata unsigned long addr,__xdata unsigned int buf_size,__xdata unsigned char *i2c_mem_buf);
 
 
 #endif /* I2C_MEMORY_H_ */
