@@ -15,7 +15,7 @@
 #include "i2c_memory.h"
 #include "one_wire_bus.h"
 //#include "ds18b20.h"
-//#include "spi_memory.h"
+#include "spi_memory.h"
 #include "spi_sd.h"
 #define fosc 11059200
 #define baud 19200

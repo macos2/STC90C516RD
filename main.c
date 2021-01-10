@@ -13,6 +13,7 @@ __xdata SpiBus spi;
 __xdata SpiSd spi_sd;
 __xdata I2cBus i2c;
 __xdata I2cMemory i2c_mem;
+__xdata SpiMemory spi_mem;
 __xdata unsigned char sd_buf[512];
 __xdata unsigned char test;
 void iic_test();
@@ -53,6 +54,7 @@ __interrupt 4 {
 		if(t=='3')test=3;
 		if(t=='4')test=4;
 		if(t=='5')test=5;
+		if(t=='6')test=6;
 	} else {
 		TI=0;
 		if(usart_p>0) {
@@ -106,6 +108,9 @@ void spi_main_init() {
 	spi.CS = gpio_format(1, 0);
 	spi_init(&spi);
 	spi_sd.spi=&spi;
+	spi_mem.bus=&spi;
+	spi_mem.n_bit_address=SPI_MEMORY_8_BIT_ADDRESS;
+	spi_mem.page_size=8;
 }
 
 void i2c_init(){
@@ -177,6 +182,20 @@ void main() {
 				sd_buf[i]=i;
 			}
 			i2c_memory_write(&i2c_mem,0x00,256,sd_buf);
+			test=0;
+		}
+		if(test==6){
+			spi.CS=gpio_format(1,4);
+			spi_memory_read(&spi_mem,00,sd_buf,256);
+			for(i=0;i<256;i++){
+				if(i%8==0)usart_send("\r\n");
+				usart_send("%02x ",sd_buf[i]);
+			}
+			for(i=0;i<256;i++){
+					sd_buf[i]=i;
+				}
+			spi_memory_write(&spi_mem,0,sd_buf,256);
+			spi.CS=gpio_format(1,0);
 			test=0;
 		}
 	};

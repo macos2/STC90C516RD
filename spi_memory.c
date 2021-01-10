@@ -13,15 +13,13 @@ __xdata unsigned long __spi_mem_addr;
 __xdata unsigned char *__spi_mem_buf;
 __xdata	unsigned int __spi_mem_buf_len;
 
-void spi_memory_set_rw_param(__xdata SpiMemory *mem,__xdata unsigned long addr,__xdata unsigned char *buf,__xdata unsigned int buf_len){
+void spi_memory_read(__xdata SpiMemory *mem,__xdata unsigned long addr,__xdata unsigned char *buf,__xdata unsigned int buf_len){
 	__spi_mem=mem;
 	__spi_mem_addr=addr;
 	__spi_mem_buf=buf;
 	__spi_mem_buf_len=buf_len;
-}
-
-void spi_memory_read(){
-	unsigned int i, *p = &__spi_mem_addr;
+	unsigned int *p = &__spi_mem_addr;
+	unsigned int  i;
 	spi_set_cs(__spi_mem->bus, 0);
 	spi_write(__spi_mem->bus, SPI_MEMORY_READ);
 
@@ -39,8 +37,13 @@ void spi_memory_read(){
 	spi_set_cs(__spi_mem->bus, 1);
 }
 
-unsigned int spi_memory_write() {
-	unsigned char i,j=0, *p = &__spi_mem_addr;
+unsigned int spi_memory_write(__xdata SpiMemory *mem,__xdata unsigned long addr,__xdata unsigned char *buf,__xdata unsigned int buf_len) {
+	__spi_mem=mem;
+	__spi_mem_addr=addr;
+	__spi_mem_buf=buf;
+	__spi_mem_buf_len=buf_len;
+	unsigned char *p = &__spi_mem_addr;
+	unsigned int  i,j=0;
 	spi_set_cs(__spi_mem->bus, 0);
 
 	do{
@@ -73,8 +76,7 @@ unsigned int spi_memory_write() {
 	spi_set_cs(__spi_mem->bus, 1);
 
 	if(__spi_mem_buf_len>__spi_mem->page_size){
-		spi_memory_set_rw_param(__spi_mem,__spi_mem_addr+__spi_mem->page_size,__spi_mem_buf+__spi_mem->page_size,__spi_mem_buf_len-__spi_mem->page_size);
-		spi_memory_write();
+		spi_memory_write(__spi_mem,__spi_mem_addr+__spi_mem->page_size,__spi_mem_buf+__spi_mem->page_size,__spi_mem_buf_len-__spi_mem->page_size);
 	}
 	return __spi_mem_buf_len;
 }
