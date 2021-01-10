@@ -14,8 +14,19 @@ unsigned char delay;
 //#define ONE_WIRE_DELAY(x) __delay=x;while(__delay--);
 
 //1 unit=2.2us
-#define ONE_WIRE_DELAY_5_MACHINE_CYCLE __asm__("nop\nnop\nnop\nnop\nnop\n")
-#define ONE_WIRE_DELAY_10_MACHINE_CYCLE __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n")
+//#define ONE_WIRE_DELAY_5_US __asm__("nop\nnop\nnop\nnop\nnop\n")
+//#define ONE_WIRE_DELAY_10_US __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n")
+//#define ONE_WIRE_DELAY_480_US ONE_WIRE_DELAY(218)
+//#define ONE_WIRE_DELAY_37_US ONE_WIRE_DELAY(19);
+//#define  ONE_WIRE_DELAY_100_US ONE_WIRE_DELAY(50)
+
+//1 unit=1/6us
+#define ONE_WIRE_DELAY_1_US __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop")
+#define ONE_WIRE_DELAY_5_US ONE_WIRE_DELAY_1_US;ONE_WIRE_DELAY_1_US;ONE_WIRE_DELAY_1_US;ONE_WIRE_DELAY_1_US;ONE_WIRE_DELAY_1_US
+#define ONE_WIRE_DELAY_10_US ONE_WIRE_DELAY_5_US;ONE_WIRE_DELAY_5_US
+#define ONE_WIRE_DELAY_37_US ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_5_US;ONE_WIRE_DELAY_1_US
+#define ONE_WIRE_DELAY_100_US ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US;ONE_WIRE_DELAY_10_US
+#define ONE_WIRE_DELAY_480_US ONE_WIRE_DELAY_100_US;ONE_WIRE_DELAY_100_US;ONE_WIRE_DELAY_100_US;ONE_WIRE_DELAY_100_US;ONE_WIRE_DELAY_37_US;ONE_WIRE_DELAY_37_US
 
 void ONE_WIRE_DELAY(unsigned char x)
 __naked
@@ -31,11 +42,13 @@ __naked
 unsigned char one_wire_bus_present() {
 	unsigned char result = 0x01;
 	one_wire_bus = 0;
-	ONE_WIRE_DELAY(218);
+	ONE_WIRE_DELAY_480_US;
 	one_wire_bus = 1;
-	ONE_WIRE_DELAY(19);
+	ONE_WIRE_DELAY_37_US;
 	result = one_wire_bus;
-	ONE_WIRE_DELAY(50);
+	ONE_WIRE_DELAY_100_US;
+	ONE_WIRE_DELAY_37_US;
+	ONE_WIRE_DELAY_10_US;
 	return result;
 }
 
@@ -45,15 +58,16 @@ void one_wire_bus_write(unsigned char value) {
 	while (i > 0) {
 		if (value & 0x01) { //write 1
 			one_wire_bus = 0;
+			ONE_WIRE_DELAY_1_US;
 			one_wire_bus = 1;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_10_US;
 		} else { //write 0
 			one_wire_bus = 0;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_10_US;
 		}
 		one_wire_bus = 1;
 		value = value >> 1;
@@ -67,11 +81,15 @@ unsigned char one_wire_bus_read() {
 	while (i > 0) {
 		result = result >> 1;
 		one_wire_bus = 0;
+		ONE_WIRE_DELAY_1_US;
 		one_wire_bus = 1;
-		ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+		ONE_WIRE_DELAY_10_US;
 		if (one_wire_bus)
 			result |= 0x80;
 		i--;
+		ONE_WIRE_DELAY_10_US;
+		ONE_WIRE_DELAY_10_US;
+		ONE_WIRE_DELAY_5_US;
 	}
 	return result;
 }
@@ -95,17 +113,24 @@ unsigned char one_wire_bus_search_rom(unsigned char alarm_search,
 			tmp = 0x00;
 			//get first bit
 			one_wire_bus = 0;
+			ONE_WIRE_DELAY_1_US;
 			one_wire_bus = 1;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+			ONE_WIRE_DELAY_10_US;
 			tmp = one_wire_bus;
 			tmp = tmp << 1;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_5_US;
 
 			//get secone bit
 			one_wire_bus = 0;
+			ONE_WIRE_DELAY_1_US;
 			one_wire_bus = 1;
-			ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+			ONE_WIRE_DELAY_10_US;
 			tmp += one_wire_bus;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_10_US;
+			ONE_WIRE_DELAY_5_US;
 
 			//decide
 			switch (tmp) {
@@ -144,14 +169,14 @@ unsigned char one_wire_bus_search_rom(unsigned char alarm_search,
 				one_wire_bus = 0;
 				//ONE_WIRE_DELAY(1);
 				one_wire_bus = 1;
-				ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-				ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-				ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+				ONE_WIRE_DELAY_10_US;
+				ONE_WIRE_DELAY_10_US;
+				ONE_WIRE_DELAY_10_US;
 			} else {				//write 0
 				one_wire_bus = 0;
-				ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-				ONE_WIRE_DELAY_10_MACHINE_CYCLE;
-				ONE_WIRE_DELAY_10_MACHINE_CYCLE;
+				ONE_WIRE_DELAY_10_US;
+				ONE_WIRE_DELAY_10_US;
+				ONE_WIRE_DELAY_10_US;
 			}
 			one_wire_bus = 1;
 		}

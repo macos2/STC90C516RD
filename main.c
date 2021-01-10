@@ -10,6 +10,7 @@
 __xdata unsigned int timer0;
 __xdata unsigned char usart_buf[512], usart_p, usart_e, i2c_dev[10],timer0_isp;
 __xdata unsigned char sd_buf[512];
+__xdata unsigned char temp[10];
 __xdata SpiBus spi;
 __xdata SpiSd spi_sd;
 __xdata I2cBus i2c;
@@ -164,16 +165,29 @@ void main() {
 			test=0;
 		}
 		if(test==3){
+			for(i=0;i<0xf0;i++){
+				sd_buf[i]=0;
+			}
 			i=one_wire_bus_search_rom(0,sd_buf,5);
-					usart_send("%d device detected\r\n",i);
-					j=0;
-					while(i>0){
-						usart_send("%d %02x %02x %02x %02x %02x %02x %02x",sd_buf[j],sd_buf[j+1],sd_buf[j+2],sd_buf[j+3],sd_buf[j+4],sd_buf[j+5]);
-						j+=6;
-						i--;
-					}
-					test=0;
-
+			usart_send("%d device detected\r\n",i);
+			j=0;
+			while(i>0){
+				usart_send("%d : %02x %02x %02x %02x %02x %02x %02x %02x\r\n",i,sd_buf[j],sd_buf[j+1],sd_buf[j+2],sd_buf[j+3],sd_buf[j+4],sd_buf[j+5],sd_buf[j+6],sd_buf[j+7]);
+				j+=8;
+				i--;
+			}
+			one_wire_bus_match_rom(sd_buf);
+			ds18b20_convert_t();
+			one_wire_bus_match_rom(sd_buf);
+			ds18b20_read_scratchpad(sd_buf+0x12,9);
+			usart_send("read ds18b20 \r\n");
+			for(i=0;i<9;i++){
+				usart_send("%02x ",*(sd_buf+0x12+i));
+			}
+			usart_send("\r\n");
+			ds18b20_temperature_to_string(sd_buf+0x12,temp);
+			usart_send("temp:%s\r\n",temp);
+			test=0;
 		}
 		if(test==4){
 			for(i=0;i<255;i++){
