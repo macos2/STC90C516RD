@@ -35,7 +35,7 @@
 #define spi_sd_r2_out_range_csd_overwrite 0x80
 
 typedef struct {
-	SpiBus *spi;
+	__xdata SpiBus *spi;
 	unsigned int block_size;//16bit up to 64Kib
 	unsigned long cap;//32bit up to 4096Mib
 	bool is_Version2;

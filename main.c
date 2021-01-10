@@ -8,13 +8,14 @@
 #include "main.h"
 
 __xdata unsigned int timer0;
-__xdata unsigned char usart_buf[128], usart_p, usart_e, i2c_dev[10],timer0_isp;
+__xdata unsigned char usart_buf[512], usart_p, usart_e, i2c_dev[10],timer0_isp;
+__xdata unsigned char sd_buf[512];
 __xdata SpiBus spi;
 __xdata SpiSd spi_sd;
 __xdata I2cBus i2c;
 __xdata I2cMemory i2c_mem;
 __xdata SpiMemory spi_mem;
-__xdata unsigned char sd_buf[512];
+
 __xdata unsigned char test;
 void iic_test();
 void iic_eeprom();
@@ -31,6 +32,17 @@ void usart_send(char *fmt, ...) {
 	usart_e++;
 	SBUF=usart_buf[0];
 	va_end(list);
+}
+
+void usart_send_direct(char *buf,unsigned char len) {
+	unsigned char i;
+	while(usart_p!=0);
+	for(i=0;i<len;i++){
+		usart_buf[i]=buf[i];
+	}
+	usart_p=len-1;
+	usart_e=1;
+	SBUF=usart_buf[0];
 }
 
 void timer0_interrupt()
@@ -55,6 +67,7 @@ __interrupt 4 {
 		if(t=='4')test=4;
 		if(t=='5')test=5;
 		if(t=='6')test=6;
+		if(t=='7')test=7;
 	} else {
 		TI=0;
 		if(usart_p>0) {
@@ -197,6 +210,10 @@ void main() {
 			spi_memory_write(&spi_mem,0,sd_buf,256);
 			spi.CS=gpio_format(1,0);
 			test=0;
+		}
+		if(test==7){
+			test=0;
+			usart_send_direct(sd_buf,255);
 		}
 	};
 }
