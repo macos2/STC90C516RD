@@ -8,9 +8,11 @@
 #include "main.h"
 
 __xdata unsigned int timer0;
-__xdata unsigned char usart_buf[512], usart_p, usart_e, i2c_dev[10],timer0_isp;
+__xdata unsigned char usart_buf[512], i2c_dev[10],timer0_isp;
+__xdata unsigned int volatile usart_p, usart_e;
 __xdata unsigned char sd_buf[512];
 __xdata unsigned char temp[10];
+__xdata volatile bool busy;
 __xdata SpiBus spi;
 __xdata SpiSd spi_sd;
 __xdata I2cBus i2c;
@@ -27,11 +29,16 @@ void spi_test();
 void usart_send(char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
-	while(usart_p!=0);
-	usart_p += vsprintf(usart_buf, fmt, list);
-	usart_p--;
-	usart_e++;
-	SBUF=usart_buf[0];
+	//while(usart_p!=0);
+	usart_p = vsprintf(usart_buf, fmt, list);
+//	usart_p--;
+//	usart_e++;
+	for(usart_e=0;usart_e<usart_p;usart_e++){
+		SBUF=usart_buf[usart_e];
+		busy=true;
+		while(busy==true);
+	}
+	//SBUF=' ';
 	va_end(list);
 }
 
@@ -71,14 +78,15 @@ __interrupt 4 {
 		if(t=='7')test=7;
 	} else {
 		TI=0;
-		if(usart_p>0) {
-			SBUF=usart_buf[usart_e];
-			usart_e++;
-			usart_p--;
-		}else{
-			usart_e=0;
-			usart_p=0;
-		}
+		busy=false;
+//		if(usart_p>0) {
+//			SBUF=usart_buf[usart_e];
+//			usart_e++;
+//			usart_p--;
+//		}else{
+//			usart_e=0;
+//			usart_p=0;
+//		}
 	}
 
 }
@@ -140,6 +148,7 @@ void i2c_init(){
 void main() {
 	unsigned int i;
 	unsigned int j;
+	unsigned char tmp,*ptmp;
 	gpio io = gpio_format(1, 7);
 	usart_init();
 	timer0_init();
@@ -151,17 +160,18 @@ void main() {
 		gpio_set(io, 1);
 		if(test==1){
 			spi_sd_init(&spi_sd,64,1);
-			spi_sd_read(&spi_sd,0,sd_buf,1);
+			spi_sd_read(&spi_sd,0,sd_buf,8);
+			usart_send("read buffer:\r\n");
+			for(i=0;i<spi_sd.block_size*8;i++){
+				if(i%8==0)usart_send("\r\n");
+				usart_send("%02x ",sd_buf[i]);
+			}
 			usart_send("\r\n");
-			spi_sd_write(&spi_sd,0,sd_buf,1);
+			spi_sd_write(&spi_sd,0,sd_buf,8);
 			test=0;
 
 		}
 		if(test==2){
-			usart_send("read buffer:\r\n");
-			for(i=0;i<255;i++){
-				usart_send("%02x ",sd_buf[i]);
-			}
 			test=0;
 		}
 		if(test==3){
@@ -180,13 +190,10 @@ void main() {
 			ds18b20_convert_t();
 			one_wire_bus_match_rom(sd_buf);
 			ds18b20_read_scratchpad(sd_buf+0x12,9);
-			usart_send("read ds18b20 \r\n");
-			for(i=0;i<9;i++){
-				usart_send("%02x ",*(sd_buf+0x12+i));
-			}
-			usart_send("\r\n");
 			ds18b20_temperature_to_string(sd_buf+0x12,temp);
-			usart_send("temp:%s\r\n",temp);
+			usart_send("read ds18b20 \r\n");
+			ptmp=sd_buf+0x12;
+			usart_send("%02x %02x %02x %02x %02x %02x %02x %02x %02x\r\ntemp:%s\r\n",ptmp[0],ptmp[1],ptmp[2],ptmp[3],ptmp[4],ptmp[5],ptmp[6],ptmp[7],ptmp[8],temp);
 			test=0;
 		}
 		if(test==4){
@@ -195,7 +202,8 @@ void main() {
 			}
 			usart_send("read buffer:\r\n");
 			for(i=0;i<255;i++){
-				usart_send("%02x ",sd_buf[i]);
+				tmp=sd_buf[i];
+				usart_send("%x ",tmp);
 			}
 			test=0;
 		}

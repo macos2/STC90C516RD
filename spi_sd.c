@@ -339,7 +339,9 @@ unsigned int spi_sd_read(__xdata SpiSd *sd,__xdata unsigned long block_addr,__xd
 	i=0;//temp args for CMD12
 	if(__num_block!=1){
 		r1=spi_sd_send_command(__sd,12,&i);
-		if(r1!=0)usart_send("Stop Read Failed\r\n");
+		if(r1!=0)usart_send("Stop Read Failed:%02x\r\n",r1);
+		r1=spi_sd_send_command(__sd,12,&i);
+		if(r1!=0)usart_send("Stop Read Failed:%02x\r\n",r1);
 	}
 	spi_set_cs(__sd->spi, 1);
 	return read;
@@ -353,14 +355,23 @@ unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__x
 	unsigned char r1,timeout;
 	unsigned int i,j,writed=0;
 	spi_set_cs(__sd->spi,0);
-	if(__num_block==1)
+	if(__num_block==1){
 		r1=spi_sd_send_command(__sd,24,&__block_addr);
-	else
+		usart_send("R1:%02x\r\n",r1);
+		r1=spi_sd_send_command(__sd,24,&__block_addr);
+		usart_send("R1:%02x\r\n",r1);
+		r1=spi_sd_send_command(__sd,24,&__block_addr);
+	}else{
 		r1=spi_sd_send_command(__sd,25,&__block_addr);
+		usart_send("R1:%02x\r\n",r1);
+		r1=spi_sd_send_command(__sd,25,&__block_addr);
+		usart_send("R1:%02x\r\n",r1);
+		r1=spi_sd_send_command(__sd,25,&__block_addr);
+	}
 	if(r1!=0){
 		usart_send("Block Write Err:%02x\r\n",r1);
 		spi_set_cs(__sd->spi,1);
-		return 0;
+		//return 0;
 	}
 
 	for(i=0;i<__num_block;i++){
