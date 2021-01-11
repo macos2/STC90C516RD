@@ -29,15 +29,17 @@ void spi_test();
 void usart_send(char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
-	//while(usart_p!=0);
+	while(busy==true);
 	usart_p = vsprintf(usart_buf, fmt, list);
-//	usart_p--;
-//	usart_e++;
-	for(usart_e=0;usart_e<usart_p;usart_e++){
-		SBUF=usart_buf[usart_e];
-		busy=true;
-		while(busy==true);
-	}
+	usart_p--;
+	usart_e=1;
+	SBUF=usart_buf[0];
+	busy=true;
+//	for(usart_e=0;usart_e<usart_p;usart_e++){
+//		SBUF=usart_buf[usart_e];
+//		busy=true;
+//		while(busy==true);
+//	}
 	//SBUF=' ';
 	va_end(list);
 }
@@ -78,15 +80,15 @@ __interrupt 4 {
 		if(t=='7')test=7;
 	} else {
 		TI=0;
-		busy=false;
-//		if(usart_p>0) {
-//			SBUF=usart_buf[usart_e];
-//			usart_e++;
-//			usart_p--;
-//		}else{
-//			usart_e=0;
-//			usart_p=0;
-//		}
+		if(usart_p>0) {
+			SBUF=usart_buf[usart_e];
+			usart_e++;
+			usart_p--;
+		}else{
+			busy=false;
+			usart_e=0;
+			usart_p=0;
+		}
 	}
 
 }
@@ -160,14 +162,14 @@ void main() {
 		gpio_set(io, 1);
 		if(test==1){
 			spi_sd_init(&spi_sd,64,1);
-			spi_sd_read(&spi_sd,0,sd_buf,8);
+			spi_sd_read(&spi_sd,0,sd_buf,1);
 			usart_send("read buffer:\r\n");
-			for(i=0;i<spi_sd.block_size*8;i++){
+			for(i=0;i<spi_sd.block_size*1;i++){
 				if(i%8==0)usart_send("\r\n");
 				usart_send("%02x ",sd_buf[i]);
 			}
 			usart_send("\r\n");
-			spi_sd_write(&spi_sd,0,sd_buf,8);
+			spi_sd_write(&spi_sd,0,sd_buf,1);
 			test=0;
 
 		}
@@ -179,7 +181,7 @@ void main() {
 				sd_buf[i]=0;
 			}
 			i=one_wire_bus_search_rom(0,sd_buf,5);
-			usart_send("%d device detected\r\n",i);
+			usart_send("\r\n%d device detected\r\n",i);
 			j=0;
 			while(i>0){
 				usart_send("%d : %02x %02x %02x %02x %02x %02x %02x %02x\r\n",i,sd_buf[j],sd_buf[j+1],sd_buf[j+2],sd_buf[j+3],sd_buf[j+4],sd_buf[j+5],sd_buf[j+6],sd_buf[j+7]);

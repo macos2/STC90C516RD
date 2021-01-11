@@ -357,21 +357,13 @@ unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__x
 	spi_set_cs(__sd->spi,0);
 	if(__num_block==1){
 		r1=spi_sd_send_command(__sd,24,&__block_addr);
-		usart_send("R1:%02x\r\n",r1);
-		r1=spi_sd_send_command(__sd,24,&__block_addr);
-		usart_send("R1:%02x\r\n",r1);
-		r1=spi_sd_send_command(__sd,24,&__block_addr);
 	}else{
-		r1=spi_sd_send_command(__sd,25,&__block_addr);
-		usart_send("R1:%02x\r\n",r1);
-		r1=spi_sd_send_command(__sd,25,&__block_addr);
-		usart_send("R1:%02x\r\n",r1);
 		r1=spi_sd_send_command(__sd,25,&__block_addr);
 	}
 	if(r1!=0){
 		usart_send("Block Write Err:%02x\r\n",r1);
 		spi_set_cs(__sd->spi,1);
-		//return 0;
+		return 0;
 	}
 
 	for(i=0;i<__num_block;i++){
@@ -394,7 +386,7 @@ unsigned int spi_sd_write(__xdata SpiSd *sd,__xdata unsigned long block_addr,__x
 		if(__num_block!=1)spi_write(__sd->spi,0xfd);
 
 		//wait for writing finish
-		timeout=255;
+		timeout=30;
 		do{
 			r1=spi_read(__sd->spi);
 			timeout--;
